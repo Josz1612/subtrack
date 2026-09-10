@@ -1,0 +1,6 @@
+{
+  "name": "SubTrack",
+  "description": "Gestor inteligente de suscripciones y gastos recurrentes con calendario, métricas financieras y seguimiento presupuestario.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
