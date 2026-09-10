@@ -32,8 +32,8 @@ jobs:
       - name: Setup Java JDK
         uses: actions/setup-java@v4
         with:
-          distribution: 'zulu'
-          java-version: '17' # Versión recomendada para Capacitor y Android modernos
+          distribution: 'temurin'
+          java-version: '21' # Versión recomendada para Capacitor y Android modernos
 
       - name: Grant execute permission for gradlew
         working-directory: ./android
