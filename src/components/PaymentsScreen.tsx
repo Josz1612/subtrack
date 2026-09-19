@@ -120,18 +120,7 @@ export const PaymentsScreen: React.FC<PaymentsScreenProps> = ({
 
   return (
     <main className="max-w-[768px] lg:max-w-[880px] mx-auto px-4 sm:px-6 py-4 pb-28 flex flex-col gap-8">
-      {/* Back navigation button */}
-      {onBack && (
-        <div className="flex items-center justify-between -mb-4">
-          <button
-            onClick={onBack}
-            className="flex items-center gap-2 text-xs sm:text-sm font-bold text-[#94a3b8] hover:text-[#3b82f6] transition-colors p-2 rounded-xl hover:bg-[#0f172a] touch-manipulation -ml-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Volver a Overview</span>
-          </button>
-        </div>
-      )}
+
 
       {/* Calendar Section */}
       <section className="flex flex-col gap-3">

@@ -20,6 +20,7 @@ import { SubscriptionDetailScreen } from './components/SubscriptionDetailScreen'
 import { NewSubscriptionModal } from './components/NewSubscriptionModal';
 import { SettingsScreen } from './components/SettingsScreen';
 import { CheckCircle2, AlertCircle, ArrowLeft } from 'lucide-react';
+import { Preferences } from '@capacitor/preferences';
 
 export default function App() {
   const navigate = useNavigate();
@@ -31,59 +32,50 @@ export default function App() {
   const [tempGoogleEmail, setTempGoogleEmail] = useState<string>('alex.smith@gmail.com');
   const [isLoading, setIsLoading] = useState(true);
 
+  // Load / Persist State
+  const [user, setUser] = useState<UserProfile>(INITIAL_USER_PROFILE);
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>(INITIAL_SUBSCRIPTIONS);
+  const [history, setHistory] = useState<PaymentHistoryItem[]>(INITIAL_PAYMENT_HISTORY);
+
+  // Load preferences asynchronously on mount
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 800);
-    return () => clearTimeout(timer);
+    const loadPreferences = async () => {
+      try {
+        const userPref = await Preferences.get({ key: 'subtrack_user' });
+        if (userPref.value) setUser(JSON.parse(userPref.value));
+
+        const subsPref = await Preferences.get({ key: 'subtrack_subscriptions' });
+        if (subsPref.value) setSubscriptions(JSON.parse(subsPref.value));
+
+        const histPref = await Preferences.get({ key: 'subtrack_history' });
+        if (histPref.value) setHistory(JSON.parse(histPref.value));
+      } catch (error) {
+        console.error('Error loading preferences:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadPreferences();
   }, []);
 
-  // Load / Persist State
-  const [user, setUser] = useState<UserProfile>(() => {
-    try {
-      const saved = localStorage.getItem('subtrack_user');
-      return saved ? JSON.parse(saved) : INITIAL_USER_PROFILE;
-    } catch {
-      return INITIAL_USER_PROFILE;
+  // Save state on change
+  useEffect(() => {
+    if (!isLoading) {
+      Preferences.set({ key: 'subtrack_user', value: JSON.stringify(user) });
     }
-  });
-
-  const [subscriptions, setSubscriptions] = useState<Subscription[]>(() => {
-    try {
-      const saved = localStorage.getItem('subtrack_subscriptions');
-      return saved ? JSON.parse(saved) : INITIAL_SUBSCRIPTIONS;
-    } catch (error) {
-      console.error('Error reading subscriptions from localStorage:', error);
-      return INITIAL_SUBSCRIPTIONS;
-    }
-  });
-
-  const [history, setHistory] = useState<PaymentHistoryItem[]>(() => {
-    try {
-      const saved = localStorage.getItem('subtrack_history');
-      return saved ? JSON.parse(saved) : INITIAL_PAYMENT_HISTORY;
-    } catch {
-      return INITIAL_PAYMENT_HISTORY;
-    }
-  });
+  }, [user, isLoading]);
 
   useEffect(() => {
-    try {
-      localStorage.setItem('subtrack_user', JSON.stringify(user));
-    } catch (e) {}
-  }, [user]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('subtrack_subscriptions', JSON.stringify(subscriptions));
-    } catch (error) {
-      console.error('Error saving subscriptions to localStorage:', error);
+    if (!isLoading) {
+      Preferences.set({ key: 'subtrack_subscriptions', value: JSON.stringify(subscriptions) });
     }
-  }, [subscriptions]);
+  }, [subscriptions, isLoading]);
 
   useEffect(() => {
-    try {
-      localStorage.setItem('subtrack_history', JSON.stringify(history));
-    } catch (e) {}
-  }, [history]);
+    if (!isLoading) {
+      Preferences.set({ key: 'subtrack_history', value: JSON.stringify(history) });
+    }
+  }, [history, isLoading]);
 
   const showToast = (text: string, type: 'success' | 'info' | 'error' = 'success') => {
     if (type === 'success') toast.success(text);
@@ -240,8 +232,8 @@ export default function App() {
 
   return (
     <div className="w-full min-h-screen bg-[#090d16] text-[#f1f5f9] selection:bg-[#3b82f6] selection:text-white antialiased font-sans flex flex-col relative overflow-x-hidden">
-      <Toaster 
-        theme="dark" 
+      <Toaster
+        theme="dark"
         position="bottom-center"
         toastOptions={{
           style: {
@@ -262,21 +254,10 @@ export default function App() {
 
       {/* Main Screen Views with Responsive Container */}
       <div className="flex-1 w-full max-w-[768px] lg:max-w-[1024px] mx-auto relative pb-24">
-        {currentScreen !== 'overview' && (
-          <div className="absolute top-4 left-4 sm:left-6 z-[100]">
-            <button
-              onClick={() => handleNavigate('overview')}
-              className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full bg-[#1e293b] hover:bg-[#334155] border border-[#334155] text-[#f1f5f9] shadow-lg transition-all active:scale-95"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span className="text-xs font-bold">Volver</span>
-            </button>
-          </div>
-        )}
 
         <Routes>
           <Route path="/" element={<Navigate to="/payments" replace />} />
-          
+
           <Route path="/register" element={
             <RegisterScreen
               onRegisterSubmit={handleRegisterSubmit}
@@ -335,6 +316,8 @@ export default function App() {
                 showToast(`Presupuesto actualizado a $${newGoal}`);
               }}
               onNavigate={(s) => handleNavigate(s)}
+              onEditSubscription={handleEditSubscription}
+              onDeleteSubscription={handleCancelSubscription}
             />
           } />
 

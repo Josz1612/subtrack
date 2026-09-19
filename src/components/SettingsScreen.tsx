@@ -61,11 +61,15 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && file.type.startsWith('image/')) {
-      const url = URL.createObjectURL(file);
-      onUpdateUser({ avatarUrl: url });
-      if (onShowToast) {
-        onShowToast('Foto de perfil actualizada', 'success');
-      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        onUpdateUser({ avatarUrl: base64String });
+        if (onShowToast) {
+          onShowToast('Foto de perfil actualizada y guardada', 'success');
+        }
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -120,18 +124,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
   return (
     <main className="max-w-[768px] lg:max-w-[880px] mx-auto px-4 sm:px-6 py-4 pb-28 flex flex-col gap-6">
-      {/* Back navigation button */}
-      {onBack && (
-        <div className="flex items-center justify-between -mb-2">
-          <button
-            onClick={onBack}
-            className="flex items-center gap-2 text-xs sm:text-sm font-bold text-[#94a3b8] hover:text-[#3b82f6] transition-colors p-2 rounded-xl hover:bg-[#0f172a] touch-manipulation -ml-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Volver a Overview</span>
-          </button>
-        </div>
-      )}
+
 
       {/* Page Title */}
       <div>

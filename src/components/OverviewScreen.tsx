@@ -45,6 +45,18 @@ export const OverviewScreen: React.FC<OverviewScreenProps> = ({
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
+
+  // Close dropdown when clicking anywhere else
+  React.useEffect(() => {
+    const handleClickOutside = () => setActiveMenuId(null);
+    if (activeMenuId) {
+      document.addEventListener('click', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [activeMenuId]);
+
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'paused'>('all');
   const [showBudgetModal, setShowBudgetModal] = useState(false);
@@ -313,7 +325,7 @@ export const OverviewScreen: React.FC<OverviewScreenProps> = ({
               <div
                 key={sub.id}
                 onClick={() => onSelectSubscription(sub)}
-                className="bg-[#0f172a] rounded-2xl p-4 shadow-subtrack border border-[#1e293b] hover:border-[#3b82f6]/60 transition-all cursor-pointer flex items-center justify-between group active:scale-[0.98] touch-manipulation"
+                className={`bg-[#0f172a] rounded-2xl p-4 shadow-subtrack border border-[#1e293b] hover:border-[#3b82f6]/60 transition-all cursor-pointer flex items-center justify-between group active:scale-[0.98] touch-manipulation relative ${activeMenuId === sub.id ? 'z-50' : 'z-0'}`}
               >
                 <div className="flex items-center gap-3.5 min-w-0">
                   <div
@@ -369,8 +381,13 @@ export const OverviewScreen: React.FC<OverviewScreenProps> = ({
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
+                            console.log('ID a editar:', sub.id, sub);
                             setActiveMenuId(null);
-                            onEditSubscription && onEditSubscription(sub);
+                            if (onEditSubscription) {
+                              onEditSubscription(sub);
+                            } else {
+                              console.error('onEditSubscription prop no está definida');
+                            }
                           }}
                           className="w-full text-left px-4 py-2.5 text-xs font-semibold text-[#f1f5f9] hover:bg-[#334155] transition-colors flex items-center gap-2"
                         >
@@ -380,8 +397,13 @@ export const OverviewScreen: React.FC<OverviewScreenProps> = ({
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
+                            console.log('ID a eliminar:', sub.id);
                             setActiveMenuId(null);
-                            onDeleteSubscription && onDeleteSubscription(sub.id);
+                            if (onDeleteSubscription) {
+                              onDeleteSubscription(sub.id);
+                            } else {
+                              console.error('onDeleteSubscription prop no está definida');
+                            }
                           }}
                           className="w-full text-left px-4 py-2.5 text-xs font-semibold text-[#ef4444] hover:bg-[#ef4444]/10 transition-colors flex items-center gap-2"
                         >
@@ -398,13 +420,7 @@ export const OverviewScreen: React.FC<OverviewScreenProps> = ({
         )}
       </section>
 
-      {/* Cerrar menú si se hace clic fuera (Overlay transparente) */}
-      {activeMenuId && (
-        <div 
-          className="fixed inset-0 z-40" 
-          onClick={() => setActiveMenuId(null)}
-        />
-      )}
+
 
       {/* Adjust Budget Modal */}
       {showBudgetModal && (

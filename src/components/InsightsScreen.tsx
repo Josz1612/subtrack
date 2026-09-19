@@ -27,7 +27,7 @@ export const InsightsScreen: React.FC<InsightsScreenProps> = ({
   const [selectedCatDetail, setSelectedCatDetail] = useState<string | null>(null);
 
   const activeSubs = subscriptions.filter((s) => s.status === 'active');
-  const currentTotal = activeSubs.reduce((sum, s) => sum + s.amount, 0) || 142.5;
+  const currentTotal = activeSubs.reduce((sum, s) => sum + s.amount, 0);
 
   // Monthly trends data
   const trends = [
@@ -48,7 +48,7 @@ export const InsightsScreen: React.FC<InsightsScreenProps> = ({
     .filter((s) => s.status === 'active' && s.category === 'Productivity')
     .reduce((sum, s) => sum + s.amount, 0);
 
-  const utilitiesTotal四周 = subscriptions
+  const utilitiesTotal = subscriptions
     .filter((s) => s.status === 'active' && s.category === 'Utilities')
     .reduce((sum, s) => sum + s.amount, 0);
 
@@ -61,20 +61,20 @@ export const InsightsScreen: React.FC<InsightsScreenProps> = ({
     .reduce((sum, s) => sum + s.amount, 0);
 
   const total =
-    entertainmentTotal + productivityTotal + utilitiesTotal四周 + healthTotal + devTotal || 1;
+    entertainmentTotal + productivityTotal + utilitiesTotal + healthTotal + devTotal;
 
-  const entPercentNum = Math.round((entertainmentTotal / total) * 100);
-  const prodPercentNum依照 = Math.round((productivityTotal / total) * 100);
-  const utilPercentNum = Math.round((utilitiesTotal四周 / total) * 100);
-  const healthPercentNum = Math.round((healthTotal / total) * 100);
-  const devPercentNum = Math.round((devTotal / total) * 100);
+  const entPercentNum = total > 0 ? Math.round((entertainmentTotal / total) * 100) : 0;
+  const prodPercentNum = total > 0 ? Math.round((productivityTotal / total) * 100) : 0;
+  const utilPercentNum = total > 0 ? Math.round((utilitiesTotal / total) * 100) : 0;
+  const healthPercentNum = total > 0 ? Math.round((healthTotal / total) * 100) : 0;
+  const devPercentNum = total > 0 ? Math.round((devTotal / total) * 100) : 0;
 
   const categoryList = [
     {
       name: 'Entertainment',
       label: 'Entretenimiento',
       amount: entertainmentTotal,
-      percent: entPercentNum || 35,
+      percent: entPercentNum,
       icon: Film,
       bgColor: 'bg-[#1e3a8a]/40',
       textColor: 'text-[#60a5fa]',
@@ -85,7 +85,7 @@ export const InsightsScreen: React.FC<InsightsScreenProps> = ({
       name: 'Productivity',
       label: 'Productividad',
       amount: productivityTotal,
-      percent: prodPercentNum依照 || 30,
+      percent: prodPercentNum,
       icon: Briefcase,
       bgColor: 'bg-[#0c4a6e]/40',
       textColor: 'text-[#38bdf8]',
@@ -95,8 +95,8 @@ export const InsightsScreen: React.FC<InsightsScreenProps> = ({
     {
       name: 'Utilities',
       label: 'Servicios',
-      amount: utilitiesTotal四周,
-      percent: utilPercentNum || 15,
+      amount: utilitiesTotal,
+      percent: utilPercentNum,
       icon: Zap,
       bgColor: 'bg-[#172554]/40',
       textColor: 'text-[#93c5fd]',
@@ -107,7 +107,7 @@ export const InsightsScreen: React.FC<InsightsScreenProps> = ({
       name: 'Health',
       label: 'Salud y Fitness',
       amount: healthTotal,
-      percent: healthPercentNum || 12,
+      percent: healthPercentNum,
       icon: Heart,
       bgColor: 'bg-[#1e1b4b]/40',
       textColor: 'text-[#a78bfa]',
@@ -118,7 +118,7 @@ export const InsightsScreen: React.FC<InsightsScreenProps> = ({
       name: 'Developer',
       label: 'Desarrollo',
       amount: devTotal,
-      percent: devPercentNum || 8,
+      percent: devPercentNum,
       icon: Code2,
       bgColor: 'bg-[#0f2e3d]/40',
       textColor: 'text-[#2dd4bf]',
@@ -129,18 +129,7 @@ export const InsightsScreen: React.FC<InsightsScreenProps> = ({
 
   return (
     <main className="max-w-[768px] lg:max-w-[880px] mx-auto px-4 sm:px-6 py-4 pb-28 flex flex-col gap-6">
-      {/* Back navigation button */}
-      {onBack && (
-        <div className="flex items-center justify-between -mb-2">
-          <button
-            onClick={onBack}
-            className="flex items-center gap-2 text-xs sm:text-sm font-bold text-[#94a3b8] hover:text-[#3b82f6] transition-colors p-2 rounded-xl hover:bg-[#0f172a] touch-manipulation -ml-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Volver a Overview</span>
-          </button>
-        </div>
-      )}
+
 
       {/* Page Header */}
       <div>
@@ -209,18 +198,16 @@ export const InsightsScreen: React.FC<InsightsScreenProps> = ({
                     )}
 
                     <div
-                      className={`w-full rounded-t-xl transition-all duration-300 ${
-                        isCurrent深
-                          ? 'bg-[#3b82f6] shadow-blue-glow'
-                          : 'bg-[#3b82f6]/30 group-hover:bg-[#3b82f6]/60'
-                      }`}
+                      className={`w-full rounded-t-xl transition-all duration-300 ${isCurrent深
+                        ? 'bg-[#3b82f6] shadow-blue-glow'
+                        : 'bg-[#3b82f6]/30 group-hover:bg-[#3b82f6]/60'
+                        }`}
                       style={{ height: item.height }}
                     />
                   </div>
                   <span
-                    className={`text-xs ${
-                      isCurrent深 ? 'font-bold text-[#3b82f6]' : 'font-medium text-[#94a3b8]'
-                    }`}
+                    className={`text-xs ${isCurrent深 ? 'font-bold text-[#3b82f6]' : 'font-medium text-[#94a3b8]'
+                      }`}
                   >
                     {item.month}
                   </span>
@@ -269,9 +256,8 @@ export const InsightsScreen: React.FC<InsightsScreenProps> = ({
                   setSelectedCatDetail(isSelected ? null : cat.name);
                   if (onSelectCategory) onSelectCategory(cat.name);
                 }}
-                className={`bg-[#0f172a] rounded-2xl p-4 sm:p-5 border transition-all duration-200 cursor-pointer active:scale-[0.98] touch-manipulation ${
-                  isSelected ? 'border-[#3b82f6] shadow-blue-glow' : 'border-[#1e293b] hover:border-[#3b82f6]/40'
-                }`}
+                className={`bg-[#0f172a] rounded-2xl p-4 sm:p-5 border transition-all duration-200 cursor-pointer active:scale-[0.98] touch-manipulation ${isSelected ? 'border-[#3b82f6] shadow-blue-glow' : 'border-[#1e293b] hover:border-[#3b82f6]/40'
+                  }`}
               >
                 <div className="flex items-center gap-3.5 mb-3">
                   <div
@@ -292,10 +278,12 @@ export const InsightsScreen: React.FC<InsightsScreenProps> = ({
 
                 {/* Progress Bar */}
                 <div className="w-full h-2 bg-[#131d35] rounded-full overflow-hidden">
-                  <div
-                    className={`h-full ${cat.barColor} rounded-full transition-all duration-700`}
-                    style={{ width: `${Math.min(cat.percent, 100)}%` }}
-                  />
+                  {cat.percent > 0 && (
+                    <div
+                      className={`h-full ${cat.barColor} rounded-full transition-all duration-700`}
+                      style={{ width: `${Math.min(cat.percent, 100)}%` }}
+                    />
+                  )}
                 </div>
 
                 {/* Category Drilldown List */}
@@ -312,7 +300,7 @@ export const InsightsScreen: React.FC<InsightsScreenProps> = ({
                       ))
                     ) : (
                       <div className="-mx-2 scale-95 origin-top">
-                        <EmptyState 
+                        <EmptyState
                           icon={<Icon className="w-5 h-5" />}
                           title="Categoría Vacía"
                           description="No hay suscripciones activas en esta categoría."
