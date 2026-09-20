@@ -232,8 +232,8 @@ export default function App() {
       category: sub.category,
     };
 
-    // Advance next payment date by 1 month
-    const nextDate = new Date();
+    // Advance next payment date based on the existing due date
+    const nextDate = new Date(sub.nextPaymentDate + 'T12:00:00');
     nextDate.setMonth(nextDate.getMonth() + (sub.billingCycle === 'yearly' ? 12 : 1));
     const nextDateStr = nextDate.toISOString().slice(0, 10);
 
