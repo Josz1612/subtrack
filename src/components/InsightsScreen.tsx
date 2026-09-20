@@ -3,6 +3,7 @@ import { Subscription, Currency } from '../types';
 import { formatCurrency } from '../data/initialData';
 import { ArrowDown, Film, Briefcase, Zap, Heart, Code2, ChevronRight, Layers, Sparkles, ArrowLeft, Plus } from 'lucide-react';
 import { EmptyState } from './EmptyState';
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface InsightsScreenProps {
   isLoading?: boolean;
@@ -161,7 +162,7 @@ export const InsightsScreen: React.FC<InsightsScreenProps> = ({
       </section>
 
       {/* Spending Trends (Bar Chart) */}
-      <section>
+      <section className="mb-8">
         <div className="flex justify-between items-center mb-3 px-1">
           <div className="flex items-center gap-2">
             <h2 className="text-lg font-bold text-[#f1f5f9]">Tendencia de Gastos</h2>
@@ -224,6 +225,37 @@ export const InsightsScreen: React.FC<InsightsScreenProps> = ({
           <h2 className="text-lg font-bold text-[#f1f5f9]">Desglose por Categoría</h2>
           <span className="text-xs text-[#64748b]">Toca una para ver detalle</span>
         </div>
+
+        {/* Gráfica de Dona */}
+        {!isLoading && total > 0 && (
+          <div className="bg-[#0f172a] rounded-[24px] p-5 border border-[#1e293b] shadow-subtrack mb-4">
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={categoryList.filter(c => c.amount > 0)}
+                  dataKey="amount"
+                  nameKey="label"
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={70}
+                  outerRadius={90}
+                  stroke="none"
+                >
+                  {categoryList.filter(c => c.amount > 0).map((entry, index) => {
+                    const VIBRANT_COLORS = ['#FF6B6B', '#FFB703', '#06D6A0', '#9D4EDD', '#00B4D8'];
+                    const hexColor = VIBRANT_COLORS[index % VIBRANT_COLORS.length];
+                    return <Cell key={`cell-${index}`} fill={hexColor} />;
+                  })}
+                </Pie>
+                <Tooltip 
+                  formatter={(value: number) => formatCurrency(value, currency)}
+                  contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '12px', color: '#f1f5f9' }}
+                  itemStyle={{ color: '#f1f5f9' }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           {isLoading ? (

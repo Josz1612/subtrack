@@ -21,6 +21,8 @@ import {
   ArrowLeft,
   Camera,
 } from 'lucide-react';
+import { Preferences } from '@capacitor/preferences';
+import { NativeBiometric } from '@capgo/capacitor-native-biometric';
 
 interface SettingsScreenProps {
   user: UserProfile;
@@ -52,6 +54,25 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const importFileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleToggleBiometric = async (checked: boolean) => {
+    if (checked) {
+      try {
+        const result = await NativeBiometric.isAvailable();
+        if (result.isAvailable) {
+          onUpdateUser({ biometricLogin: true });
+          await Preferences.set({ key: 'isBiometricEnabled', value: 'true' });
+        } else {
+          if (onShowToast) onShowToast('Biometría no disponible en este dispositivo', 'error');
+        }
+      } catch (e) {
+        if (onShowToast) onShowToast('Error al verificar biometría', 'error');
+      }
+    } else {
+      onUpdateUser({ biometricLogin: false });
+      await Preferences.set({ key: 'isBiometricEnabled', value: 'false' });
+    }
+  };
 
   const handleAvatarClick = () => {
     if (fileInputRef.current) {
@@ -342,7 +363,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               <input
                 type="checkbox"
                 checked={user.biometricLogin}
-                onChange={(e) => onUpdateUser({ biometricLogin: e.target.checked })}
+                onChange={(e) => handleToggleBiometric(e.target.checked)}
                 className="sr-only peer"
               />
               <div className="w-11 h-6 bg-[#1e293b] rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[12px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#3b82f6]" />

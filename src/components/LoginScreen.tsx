@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GOOGLE_ICON_URL, APPLE_ICON_URL } from '../data/initialData';
 import { SubTrackLogo } from './SubTrackLogo';
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { Preferences } from '@capacitor/preferences';
+import { NativeBiometric } from '@capgo/capacitor-native-biometric';
 
 interface LoginScreenProps {
   onLoginSuccess: () => void;
@@ -21,6 +22,27 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    const checkBiometric = async () => {
+      try {
+        const pref = await Preferences.get({ key: 'isBiometricEnabled' });
+        if (pref.value === 'true') {
+          await NativeBiometric.verifyIdentity({
+            reason: 'Desbloquea SubTrack para ver tus suscripciones',
+            title: 'Autenticación requerida',
+          });
+          
+          await Preferences.set({ key: 'isLoggedIn', value: 'true' });
+          onLoginSuccess();
+        }
+      } catch (err) {
+        // Falló o fue cancelado, continuar al login normal
+        console.log('Biometric auth failed or canceled', err);
+      }
+    };
+    checkBiometric();
+  }, [onLoginSuccess]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
