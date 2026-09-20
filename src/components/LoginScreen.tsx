@@ -22,6 +22,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [isCheckingBiometrics, setIsCheckingBiometrics] = useState(true);
 
   useEffect(() => {
     const checkBiometric = async () => {
@@ -35,10 +36,13 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
           
           await Preferences.set({ key: 'isLoggedIn', value: 'true' });
           onLoginSuccess();
+        } else {
+          setIsCheckingBiometrics(false);
         }
       } catch (err) {
         // Falló o fue cancelado, continuar al login normal
         console.log('Biometric auth failed or canceled', err);
+        setIsCheckingBiometrics(false);
       }
     };
     checkBiometric();
@@ -66,6 +70,19 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
       setError('Ocurrió un error al intentar iniciar sesión.');
     }
   };
+
+  if (isCheckingBiometrics) {
+    return (
+      <div className="min-h-screen bg-[#070b14] flex flex-col items-center justify-center p-4">
+        <div className="w-24 h-24 rounded-3xl overflow-hidden shadow-blue-glow bg-[#131d35] p-3 border border-[#1e293b] flex items-center justify-center animate-pulse">
+          <SubTrackLogo size={70} />
+        </div>
+        <div className="mt-8 text-[#94a3b8] text-sm font-semibold animate-pulse">
+          Verificando identidad...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#070b14] flex items-center justify-center p-4 sm:p-6 relative overflow-hidden">

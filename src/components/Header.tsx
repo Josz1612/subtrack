@@ -33,7 +33,6 @@ export const Header: React.FC<HeaderProps> = ({
   const navigate = useNavigate();
   const location = useLocation();
   const currentScreen = (location.pathname.substring(1) || 'payments') as ScreenId;
-  const [showScreenPicker, setShowScreenPicker] = useState(false);
   const [showQuickMenu, setShowQuickMenu] = useState(false);
 
   const isDetailOrSubScreen = currentScreen === 'detail' || currentScreen === 'new_subscription';
@@ -42,19 +41,6 @@ export const Header: React.FC<HeaderProps> = ({
     currentScreen === 'google_select' ||
     currentScreen === 'google_consent' ||
     currentScreen === 'onboarding';
-
-  const screens: { id: ScreenId; label: string; icon: string }[] = [
-    { id: 'register', label: '1. Crea tu cuenta (Sign Up)', icon: '📝' },
-    { id: 'google_select', label: '2. Selecciona cuenta Google', icon: '🔍' },
-    { id: 'google_consent', label: '3. Permisos de Google', icon: '🛡️' },
-    { id: 'onboarding', label: '4. Bienvenida / Setup (Paso 1)', icon: '🚀' },
-    { id: 'payments', label: '5. Pagos & Calendario (Main)', icon: '📅' },
-    { id: 'overview', label: '6. Resumen General (Overview)', icon: '📊' },
-    { id: 'insights', label: '7. Insights & Tendencias', icon: '📈' },
-    { id: 'detail', label: '8. Detalle Suscripción', icon: '🔍' },
-    { id: 'new_subscription', label: '9. Nueva Suscripción (Form)', icon: '➕' },
-    { id: 'settings', label: '10. Ajustes & Preferencias', icon: '⚙️' },
-  ];
 
   return (
     <>
@@ -97,52 +83,6 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Right Actions */}
         <div className="flex items-center gap-2">
-          {/* Screen Switcher */}
-          <div className="relative">
-            <button
-              onClick={() => setShowScreenPicker(!showScreenPicker)}
-              title="Explorar todas las vistas del diseño"
-              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-[#0f172a] hover:bg-[#1e293b] text-[#60a5fa] border border-[#1e293b] transition-all active:scale-95 shadow-sm min-h-[38px] touch-manipulation"
-            >
-              <Layers className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Vistas</span>
-            </button>
-
-            {showScreenPicker && (
-              <>
-                <div
-                  className="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs"
-                  onClick={() => setShowScreenPicker(false)}
-                />
-                <div className="absolute right-0 mt-2 w-72 bg-[#0f172a] rounded-2xl shadow-subtrack-lg border border-[#1e293b] p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
-                  <div className="px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-[#94a3b8] border-b border-[#1e293b] flex items-center justify-between">
-                    <span>Pantallas del Diseño</span>
-                    <span className="text-[#3b82f6] text-[10px]">10 vistas</span>
-                  </div>
-                  <div className="max-h-80 overflow-y-auto py-1 space-y-1">
-                    {screens.map((s) => (
-                      <button
-                        key={s.id}
-                        onClick={() => {
-                          navigate(`/${s.id}`);
-                          setShowScreenPicker(false);
-                        }}
-                        className={`w-full text-left px-3 py-2.5 rounded-xl text-xs flex items-center gap-2.5 transition-colors ${
-                          currentScreen === s.id
-                            ? 'bg-[#3b82f6] text-white font-bold shadow-sm'
-                            : 'text-[#f1f5f9] hover:bg-[#1e293b]'
-                        }`}
-                      >
-                        <span className="text-sm">{s.icon}</span>
-                        <span className="truncate">{s.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-
           {!isAuthScreen && (
             <>
               {onAddNew && (

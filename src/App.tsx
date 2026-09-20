@@ -45,7 +45,9 @@ export default function App() {
     const loadPreferences = async () => {
       try {
         const authPref = await Preferences.get({ key: 'isLoggedIn' });
-        if (authPref.value === 'true') {
+        const bioPref = await Preferences.get({ key: 'isBiometricEnabled' });
+        
+        if (authPref.value === 'true' && bioPref.value !== 'true') {
           setIsAuthenticated(true);
         }
 

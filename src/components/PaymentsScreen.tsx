@@ -123,21 +123,27 @@ export const PaymentsScreen: React.FC<PaymentsScreenProps> = ({
 
   const syncToNativeCalendar = async () => {
     try {
-      await CapacitorCalendar.requestAllPermissions();
+      // Solicitar permisos de escritura y lectura
+      const result = await CapacitorCalendar.requestPermissions();
       
-      const activeSubs = subscriptions.filter(s => s.status === 'active');
-      for (const sub of activeSubs) {
-        const startDate = new Date(sub.nextPaymentDate).getTime();
-        const endDate = startDate + 3600000; // + 1 hour
+      // La clave exacta del resultado de permisos depende de la versión del plugin (writeCalendar o readCalendar)
+      if (result.writeCalendar === 'granted' || result.readCalendar === 'granted' || result.calendar === 'granted') {
+        const activeSubs = subscriptions.filter(s => s.status === 'active');
+        for (const sub of activeSubs) {
+          const startDate = new Date(sub.nextPaymentDate).getTime();
+          const endDate = startDate + 3600000; // + 1 hour
 
-        await CapacitorCalendar.createEvent({
-          title: 'Pago de ' + sub.name,
-          startDate: startDate,
-          endDate: endDate,
-        });
+          await CapacitorCalendar.createEvent({
+            title: 'Pago de ' + sub.name,
+            startDate: startDate,
+            endDate: endDate,
+          });
+        }
+        
+        if (onShowToast) onShowToast('Eventos sincronizados con tu calendario', 'success');
+      } else {
+        if (onShowToast) onShowToast('Permiso de calendario denegado', 'error');
       }
-      
-      if (onShowToast) onShowToast('Eventos sincronizados con tu calendario', 'success');
     } catch (error) {
       console.error('Error sincronizando calendario:', error);
       if (onShowToast) onShowToast('Error al sincronizar o permiso denegado', 'error');
