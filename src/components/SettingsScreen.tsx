@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { UserProfile, Subscription, Currency } from '../types';
 import { formatCurrency } from '../data/initialData';
 import { SubTrackLogo } from './SubTrackLogo';
@@ -58,6 +58,27 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const importFileInputRef = useRef<HTMLInputElement>(null);
+
+  const [budgetLimit, setBudgetLimit] = useState(3000);
+
+  useEffect(() => {
+    const loadBudget = async () => {
+      const { value } = await Preferences.get({ key: 'user_budget' });
+      if (value) {
+        const parsed = parseFloat(value);
+        if (!parsed || isNaN(parsed) || parsed < 50) {
+          await Preferences.set({ key: 'user_budget', value: '3000' });
+          setBudgetLimit(3000);
+        } else {
+          setBudgetLimit(parsed);
+        }
+      } else {
+        await Preferences.set({ key: 'user_budget', value: '3000' });
+        setBudgetLimit(3000);
+      }
+    };
+    loadBudget();
+  }, []);
 
   const handleToggleBiometric = async (checked: boolean) => {
     await Haptics.impact({ style: ImpactStyle.Light });
@@ -253,13 +274,15 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           <div className="p-4 sm:p-5 flex items-center justify-between">
             <div 
               className="flex items-center gap-3.5 cursor-pointer active:scale-95 transition-all touch-manipulation"
-              onClick={() => {
-                const val = window.prompt(`Ingresa tu nuevo presupuesto mensual (en ${user.preferredCurrency}):`);
-                if (val !== null) {
-                  const parsed = parseFloat(val);
-                  if (!isNaN(parsed) && parsed > 0) {
-                    const mxnBudget = convertAmount(parsed, user.preferredCurrency as any, 'MXN');
-                    onUpdateUser({ monthlyBudgetGoal: mxnBudget });
+              onClick={async () => {
+                const input = window.prompt('Ingresa el nuevo presupuesto en MXN:', budgetLimit.toString());
+                if (input !== null && input.trim() !== '') {
+                  const newVal = parseFloat(input);
+                  if (!isNaN(newVal) && newVal > 0) {
+                    setBudgetLimit(newVal);
+                    await Preferences.set({ key: 'user_budget', value: newVal.toString() });
+                    // Si tienes el onUpdateUser también para otras cosas, puedes activarlo opcionalmente
+                    onUpdateUser({ monthlyBudgetGoal: newVal });
                     if (onShowToast) onShowToast('Presupuesto actualizado correctamente', 'success');
                   } else {
                     if (onShowToast) onShowToast('Por favor ingresa un número válido mayor a 0', 'error');
@@ -273,7 +296,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               <div>
                 <p className="text-xs sm:text-sm font-bold text-[#f1f5f9]">Límite de Presupuesto</p>
                 <p className="text-xs text-[#94a3b8]">
-                  {formatCurrency(user.monthlyBudgetGoal, user.preferredCurrency)} mensual <span className="text-[#3b82f6] ml-1">(Editar)</span>
+                  {formatCurrency(budgetLimit, user.preferredCurrency)} mensual <span className="text-[#3b82f6] ml-1">(Editar)</span>
                 </p>
               </div>
             </div>
