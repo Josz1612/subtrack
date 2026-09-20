@@ -251,14 +251,28 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           </div>
 
           <div className="p-4 sm:p-5 flex items-center justify-between">
-            <div className="flex items-center gap-3.5">
+            <div 
+              className="flex items-center gap-3.5 cursor-pointer active:scale-95 transition-all touch-manipulation"
+              onClick={() => {
+                const val = window.prompt('Ingresa tu nuevo presupuesto mensual (en tu moneda base, MXN):');
+                if (val !== null) {
+                  const parsed = parseFloat(val);
+                  if (!isNaN(parsed) && parsed > 0) {
+                    onUpdateUser({ monthlyBudgetGoal: parsed });
+                    if (onShowToast) onShowToast('Presupuesto actualizado correctamente', 'success');
+                  } else {
+                    if (onShowToast) onShowToast('Por favor ingresa un número válido mayor a 0', 'error');
+                  }
+                }
+              }}
+            >
               <div className="w-10 h-10 rounded-xl bg-[#131d35] flex items-center justify-center text-[#38bdf8] border border-[#1e293b]">
                 <Target className="w-5 h-5" />
               </div>
               <div>
                 <p className="text-xs sm:text-sm font-bold text-[#f1f5f9]">Límite de Presupuesto</p>
                 <p className="text-xs text-[#94a3b8]">
-                  {formatCurrency(user.monthlyBudgetGoal, user.preferredCurrency)} mensual
+                  {formatCurrency(user.monthlyBudgetGoal, user.preferredCurrency)} mensual <span className="text-[#3b82f6] ml-1">(Editar)</span>
                 </p>
               </div>
             </div>
