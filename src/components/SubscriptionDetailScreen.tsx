@@ -17,6 +17,8 @@ import {
   Play,
   Check,
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Haptics, NotificationType } from '@capacitor/haptics';
 
 interface SubscriptionDetailScreenProps {
   subscription: Subscription;
@@ -244,7 +246,10 @@ export const SubscriptionDetailScreen: React.FC<SubscriptionDetailScreenProps> =
         </button>
 
         <button
-          onClick={() => setShowCancelModal(true)}
+          onClick={async () => {
+            await Haptics.notification({ type: NotificationType.Warning });
+            setShowCancelModal(true);
+          }}
           className="w-full bg-transparent border border-[#ef4444]/40 text-[#ef4444] hover:bg-[#ef4444]/10 py-3.5 rounded-xl font-bold text-xs sm:text-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2 min-h-[48px] touch-manipulation"
         >
           <Trash2 className="w-4 h-4" />
@@ -253,36 +258,42 @@ export const SubscriptionDetailScreen: React.FC<SubscriptionDetailScreenProps> =
       </section>
 
       {/* Cancel Confirmation Modal */}
-      {showCancelModal && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-[#0f172a] rounded-2xl p-6 max-w-sm w-full shadow-subtrack-lg border border-[#1e293b] text-center animate-in fade-in zoom-in-95 duration-150">
-            <div className="w-12 h-12 rounded-2xl bg-[#ef4444]/20 text-[#ef4444] border border-[#ef4444]/30 flex items-center justify-center mx-auto mb-4">
-              <Trash2 className="w-6 h-6" />
-            </div>
-            <h3 className="text-lg font-bold text-[#f1f5f9] mb-1">¿Eliminar suscripción?</h3>
-            <p className="text-xs text-[#94a3b8] mb-6 leading-relaxed">
-              Se eliminará permanentemente <strong>{subscription.name}</strong> y sus recordatorios de cobro.
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowCancelModal(false)}
-                className="flex-1 py-2.5 rounded-xl border border-[#334155] text-xs font-semibold text-[#f1f5f9] hover:bg-[#1e293b]"
-              >
-                No, mantener
-              </button>
-              <button
-                onClick={() => {
-                  onCancelSub(subscription.id);
-                  setShowCancelModal(false);
-                }}
-                className="flex-1 py-2.5 rounded-xl bg-[#ef4444] text-white text-xs font-bold hover:bg-[#dc2626] shadow-sm"
-              >
-                Sí, eliminar
-              </button>
-            </div>
+      <AnimatePresence>
+        {showCancelModal && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.2 }}
+              className="bg-[#0f172a] rounded-2xl p-6 max-w-sm w-full shadow-subtrack-lg border border-[#1e293b] text-center"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-[#ef4444]/20 text-[#ef4444] border border-[#ef4444]/30 flex items-center justify-center mx-auto mb-4">
+                <Trash2 className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-bold text-[#f1f5f9] mb-1">¿Eliminar suscripción? Esta acción no se puede deshacer.</h3>
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => setShowCancelModal(false)}
+                  className="flex-1 py-2.5 rounded-xl border border-[#334155] text-xs font-semibold text-[#94a3b8] bg-[#1e293b] hover:bg-[#334155]"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={async () => {
+                    await Haptics.notification({ type: NotificationType.Warning });
+                    onCancelSub(subscription.id);
+                    setShowCancelModal(false);
+                  }}
+                  className="flex-1 py-2.5 rounded-xl bg-[#ef4444] text-white text-xs font-bold hover:bg-[#dc2626] shadow-sm"
+                >
+                  Eliminar
+                </button>
+              </div>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
     </main>
   );
 };

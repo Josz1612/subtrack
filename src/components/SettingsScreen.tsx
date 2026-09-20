@@ -25,6 +25,7 @@ import { Preferences } from '@capacitor/preferences';
 import { NativeBiometric } from '@capgo/capacitor-native-biometric';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
+import { Haptics, ImpactStyle } from '@capacitor/haptics';
 
 interface SettingsScreenProps {
   user: UserProfile;
@@ -58,6 +59,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   const importFileInputRef = useRef<HTMLInputElement>(null);
 
   const handleToggleBiometric = async (checked: boolean) => {
+    await Haptics.impact({ style: ImpactStyle.Light });
     if (checked) {
       try {
         const result = await NativeBiometric.isAvailable();
@@ -257,7 +259,10 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               <input
                 type="checkbox"
                 checked={user.budgetGoalEnabled}
-                onChange={(e) => onUpdateUser({ budgetGoalEnabled: e.target.checked })}
+                onChange={async (e) => {
+                  await Haptics.impact({ style: ImpactStyle.Light });
+                  onUpdateUser({ budgetGoalEnabled: e.target.checked });
+                }}
                 className="sr-only peer"
               />
               <div className="w-11 h-6 bg-[#1e293b] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[12px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#3b82f6]" />

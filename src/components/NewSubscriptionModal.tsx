@@ -3,6 +3,7 @@ import { Subscription, Category, Currency, BillingCycle } from '../types';
 import { POPULAR_PRESETS } from '../data/initialData';
 import { SubTrackLogo } from './SubTrackLogo';
 import { X, Search, Dumbbell, Save, Plus } from 'lucide-react';
+import { Haptics, NotificationType } from '@capacitor/haptics';
 
 interface NewSubscriptionModalProps {
   subscriptionToEdit?: Subscription | null;
@@ -56,9 +57,11 @@ export const NewSubscriptionModal: React.FC<NewSubscriptionModalProps> = ({
     p.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
+
+    await Haptics.notification({ type: NotificationType.Success });
 
     const parsedAmount = parseFloat(amount) || 0;
 

@@ -16,7 +16,9 @@ import {
   CreditCard,
   ArrowLeft,
   CalendarDays,
+  ListFilter,
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { EmptyState } from './EmptyState';
 import { CapacitorCalendar } from '@capgo/capacitor-calendar';
 
@@ -292,74 +294,79 @@ export const PaymentsScreen: React.FC<PaymentsScreenProps> = ({
             {/* Vertical Timeline Line */}
             <div className="absolute left-6 top-6 bottom-6 w-0.5 bg-[#1e293b] hidden sm:block" />
 
-            {displayedUpcoming.map((sub) => {
-              return (
-                <div
-                  key={sub.id}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#0f172a] p-4 sm:p-5 rounded-2xl shadow-subtrack border border-[#1e293b] hover:border-[#3b82f6]/50 transition-all duration-200 relative z-10"
-                >
-                  <div
-                    onClick={() => onSelectSubscription(sub)}
-                    className="flex items-center gap-3.5 flex-1 min-w-0 cursor-pointer"
+            <AnimatePresence>
+              {displayedUpcoming.map((sub) => {
+                return (
+                  <motion.div
+                    key={sub.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, x: -50, transition: { duration: 0.2 } }}
+                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#0f172a] p-4 sm:p-5 rounded-2xl shadow-subtrack border border-[#1e293b] hover:border-[#3b82f6]/50 transition-all duration-200 relative z-10"
                   >
-                    {/* Icon Container */}
                     <div
-                      style={{ backgroundColor: sub.iconBgColor || '#1e293b' }}
-                      className="w-12 h-12 rounded-2xl text-white flex items-center justify-center font-bold text-xl shrink-0 shadow-sm relative"
+                      onClick={() => onSelectSubscription(sub)}
+                      className="flex items-center gap-3.5 flex-1 min-w-0 cursor-pointer"
                     >
-                      {sub.logoType === 'spotify' ? (
-                        <Radio className="w-6 h-6 text-white" />
-                      ) : (
-                        <span>{sub.iconLetter || sub.name.charAt(0)}</span>
-                      )}
-                    </div>
-
-                    <div className="flex flex-col min-w-0">
-                      <span className="font-bold text-base text-[#f1f5f9] truncate">
-                        {sub.name}
-                      </span>
-                      <span className="text-xs text-[#94a3b8]">
-                        Vence {sub.nextPaymentDate.replace('2026-', '').replace('-', '/')} • {sub.category}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-[#1e293b]">
-                    <div className="text-left sm:text-right">
-                      <span className="text-lg font-bold text-[#f1f5f9]">
-                        {formatCurrency(sub.amount, currency)}
-                      </span>
-                      <p className="text-[11px] text-[#64748b]">
-                        {sub.billingCycle === 'monthly' ? 'Mensual' : 'Anual'}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center gap-1.5">
-                      {onRecordPayment && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onRecordPayment(sub);
-                          }}
-                          className="px-3 py-2 bg-[#1e3a8a]/60 hover:bg-[#1e3a8a] text-[#93c5fd] hover:text-white border border-[#3b82f6]/40 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm flex items-center gap-1 touch-manipulation min-h-[38px]"
-                          title="Registrar Pago Ahora"
-                        >
-                          <CheckCircle2 className="w-4 h-4 text-[#38bdf8]" />
-                          <span className="hidden xs:inline">Pagar</span>
-                        </button>
-                      )}
-
-                      <button
-                        onClick={() => onSelectSubscription(sub)}
-                        className="px-3 py-2 bg-[#1e293b] hover:bg-[#334155] text-xs font-semibold text-[#f1f5f9] rounded-xl transition-all active:scale-95 min-h-[38px] touch-manipulation"
+                      {/* Icon Container */}
+                      <div
+                        style={{ backgroundColor: sub.iconBgColor || '#1e293b' }}
+                        className="w-12 h-12 rounded-2xl text-white flex items-center justify-center font-bold text-xl shrink-0 shadow-sm relative"
                       >
-                        Detalle
-                      </button>
+                        {sub.logoType === 'spotify' ? (
+                          <Radio className="w-6 h-6 text-white" />
+                        ) : (
+                          <span>{sub.iconLetter || sub.name.charAt(0)}</span>
+                        )}
+                      </div>
+
+                      <div className="flex flex-col min-w-0">
+                        <span className="font-bold text-base text-[#f1f5f9] truncate">
+                          {sub.name}
+                        </span>
+                        <span className="text-xs text-[#94a3b8]">
+                          Vence {sub.nextPaymentDate.replace('2026-', '').replace('-', '/')} • {sub.category}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              );
-            })}
+
+                    <div className="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-[#1e293b]">
+                      <div className="text-left sm:text-right">
+                        <span className="text-lg font-bold text-[#f1f5f9]">
+                          {formatCurrency(sub.amount, currency)}
+                        </span>
+                        <p className="text-[11px] text-[#64748b]">
+                          {sub.billingCycle === 'monthly' ? 'Mensual' : 'Anual'}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-1.5">
+                        {onRecordPayment && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onRecordPayment(sub);
+                            }}
+                            className="px-3 py-2 bg-[#1e3a8a]/60 hover:bg-[#1e3a8a] text-[#93c5fd] hover:text-white border border-[#3b82f6]/40 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm flex items-center gap-1 touch-manipulation min-h-[38px]"
+                            title="Registrar Pago Ahora"
+                          >
+                            <CheckCircle2 className="w-4 h-4 text-[#38bdf8]" />
+                            <span className="hidden xs:inline">Pagar</span>
+                          </button>
+                        )}
+
+                        <button
+                          onClick={() => onSelectSubscription(sub)}
+                          className="px-3 py-2 bg-[#1e293b] hover:bg-[#334155] text-xs font-semibold text-[#f1f5f9] rounded-xl transition-all active:scale-95 min-h-[38px] touch-manipulation"
+                        >
+                          Detalle
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
           </div>
         )}
       </section>
