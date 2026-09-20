@@ -16,11 +16,21 @@ export const APPLE_ICON_URL =
   'https://lh3.googleusercontent.com/aida-public/AB6AXuBA1g2LOPas6DnO_nUqg_maiqeI5tU-EdAjwJjeUxSe1NfpP-OtrvmG66oh4qV2WrcAVekd_LqrCQ_K3WU6Vl_kZ-yT4iFCmUA20uwwgJml_jBvr9zWIqMPGDZJ8s5QzyMKNVtcdUCW3vxcdiWY7UZvLh6GeJVHQ2N3PGxGmL_k_srwCcDR2oEhgIr9Xm9KJbgnquetH6XeRrKRCIQNf6GZxGOyRKOt9euWCa8bg_c9dUilfxI9NEuycQ';
 
 export const getCurrentMonthDate = (day: number): string => {
-  const d = new Date();
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const now = new Date();
+  let year = now.getFullYear();
+  let month = now.getMonth();
+
+  if (day < now.getDate()) {
+    month += 1;
+    if (month > 11) {
+      month = 0;
+      year += 1;
+    }
+  }
+
+  const monthStr = String(month + 1).padStart(2, '0');
   const dayStr = String(day).padStart(2, '0');
-  return `${year}-${month}-${dayStr}`;
+  return `${year}-${monthStr}-${dayStr}`;
 };
 
 export const INITIAL_USER_PROFILE: UserProfile = {

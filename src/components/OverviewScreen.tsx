@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Subscription, Currency, ScreenId } from '../types';
 import { formatCurrency } from '../data/initialData';
+import { convertAmount } from '../utils/currency';
 import {
   Plus,
   Search,
@@ -63,7 +64,9 @@ export const OverviewScreen: React.FC<OverviewScreenProps> = ({
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'paused'>('all');
   const [showBudgetModal, setShowBudgetModal] = useState<boolean>(false);
-  const [tempBudget, setTempBudget] = useState<string>(monthlyBudgetGoal.toString());
+  const [tempBudget, setTempBudget] = useState<string>(
+    convertAmount(monthlyBudgetGoal, 'MXN', currency as any).toString()
+  );
 
   const activeSubs = subscriptions.filter((s) => s.status === 'active');
   const pausedSubs = subscriptions.filter((s) => s.status === 'paused');
@@ -89,7 +92,8 @@ export const OverviewScreen: React.FC<OverviewScreenProps> = ({
     e.preventDefault();
     const parsed = parseFloat(tempBudget);
     if (parsed > 0 && onUpdateBudget) {
-      onUpdateBudget(parsed);
+      const mxnBudget = convertAmount(parsed, currency as any, 'MXN');
+      onUpdateBudget(mxnBudget);
     }
     setShowBudgetModal(false);
   };
