@@ -15,6 +15,14 @@ export const GOOGLE_ICON_URL =
 export const APPLE_ICON_URL =
   'https://lh3.googleusercontent.com/aida-public/AB6AXuBA1g2LOPas6DnO_nUqg_maiqeI5tU-EdAjwJjeUxSe1NfpP-OtrvmG66oh4qV2WrcAVekd_LqrCQ_K3WU6Vl_kZ-yT4iFCmUA20uwwgJml_jBvr9zWIqMPGDZJ8s5QzyMKNVtcdUCW3vxcdiWY7UZvLh6GeJVHQ2N3PGxGmL_k_srwCcDR2oEhgIr9Xm9KJbgnquetH6XeRrKRCIQNf6GZxGOyRKOt9euWCa8bg_c9dUilfxI9NEuycQ';
 
+export const getCurrentMonthDate = (day: number): string => {
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const dayStr = String(day).padStart(2, '0');
+  return `${year}-${month}-${dayStr}`;
+};
+
 export const INITIAL_USER_PROFILE: UserProfile = {
   name: 'Alex Smith',
   email: 'alex.smith@gmail.com',
@@ -25,7 +33,7 @@ export const INITIAL_USER_PROFILE: UserProfile = {
   notification1Day: true,
   notification3Days: false,
   monthlyReport: true,
-  biometricLogin: true,
+  biometricLogin: false,
 };
 
 export const INITIAL_SUBSCRIPTIONS: Subscription[] = [
@@ -36,7 +44,7 @@ export const INITIAL_SUBSCRIPTIONS: Subscription[] = [
     amount: 269,
     currency: 'MXN',
     billingCycle: 'monthly',
-    nextPaymentDate: '2026-11-15',
+    nextPaymentDate: getCurrentMonthDate(15),
     paymentMethod: {
       type: 'VISA',
       last4: '4242',
@@ -55,7 +63,7 @@ export const INITIAL_SUBSCRIPTIONS: Subscription[] = [
     amount: 139,
     currency: 'MXN',
     billingCycle: 'monthly',
-    nextPaymentDate: '2026-11-20',
+    nextPaymentDate: getCurrentMonthDate(20),
     paymentMethod: {
       type: 'MASTERCARD',
       last4: '8899',
@@ -74,7 +82,7 @@ export const INITIAL_SUBSCRIPTIONS: Subscription[] = [
     amount: 699,
     currency: 'MXN',
     billingCycle: 'monthly',
-    nextPaymentDate: '2026-11-25',
+    nextPaymentDate: getCurrentMonthDate(25),
     paymentMethod: {
       type: 'MASTERCARD',
       last4: '8899',
@@ -93,7 +101,7 @@ export const INITIAL_SUBSCRIPTIONS: Subscription[] = [
     amount: 49,
     currency: 'MXN',
     billingCycle: 'monthly',
-    nextPaymentDate: '2026-11-20',
+    nextPaymentDate: getCurrentMonthDate(20),
     paymentMethod: {
       type: 'VISA',
       last4: '1234',
@@ -112,7 +120,7 @@ export const INITIAL_SUBSCRIPTIONS: Subscription[] = [
     amount: 499,
     currency: 'MXN',
     billingCycle: 'monthly',
-    nextPaymentDate: '2026-12-01',
+    nextPaymentDate: getCurrentMonthDate(1),
     paymentMethod: {
       type: 'VISA',
       last4: '4242',
@@ -131,7 +139,7 @@ export const INITIAL_SUBSCRIPTIONS: Subscription[] = [
     amount: 99,
     currency: 'MXN',
     billingCycle: 'monthly',
-    nextPaymentDate: '2026-11-28',
+    nextPaymentDate: getCurrentMonthDate(28),
     paymentMethod: {
       type: 'VISA',
       last4: '4242',
@@ -299,13 +307,24 @@ export const POPULAR_PRESETS = [
   },
 ];
 
-export function formatCurrency(amount: number, currency: string = 'USD'): string {
+export function formatCurrency(amount: number, targetCurrency: string = 'MXN'): string {
   const symbolMap: Record<string, string> = {
     USD: '$',
     EUR: '€',
     MXN: '$',
     GBP: '£',
   };
-  const symbol = symbolMap[currency] || '$';
-  return `${symbol}${amount.toFixed(2)}`;
+  const symbol = symbolMap[targetCurrency] || '$';
+
+  // Base price in DB is assumed MXN
+  let convertedAmount = amount;
+  if (targetCurrency === 'USD') {
+    convertedAmount = amount / 18.5;
+  } else if (targetCurrency === 'EUR') {
+    convertedAmount = amount / 20.5;
+  } else if (targetCurrency === 'GBP') {
+    convertedAmount = amount / 24.0;
+  }
+
+  return `${symbol}${convertedAmount.toFixed(2)}`;
 }
