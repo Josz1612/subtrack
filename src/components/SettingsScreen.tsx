@@ -26,6 +26,7 @@ import { NativeBiometric } from '@capgo/capacitor-native-biometric';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
+import { motion } from 'framer-motion';
 
 interface SettingsScreenProps {
   user: UserProfile;
@@ -155,7 +156,13 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   };
 
   return (
-    <main className="max-w-[768px] lg:max-w-[880px] mx-auto px-4 sm:px-6 py-4 pb-28 flex flex-col gap-6">
+    <motion.main
+      initial={{ opacity: 0, x: 10 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -10 }}
+      transition={{ duration: 0.15, ease: "easeInOut" }}
+      className="max-w-[768px] lg:max-w-[880px] mx-auto px-4 sm:px-6 py-4 pb-28 flex flex-col gap-6"
+    >
 
 
       {/* Page Title */}
@@ -637,7 +644,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           </div>
         </div>
       )}
-    </main>
+    </motion.main>
   );
 };
 

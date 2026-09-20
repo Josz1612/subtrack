@@ -17,6 +17,8 @@ import {
   MoreVertical,
 } from 'lucide-react';
 import { EmptyState } from './EmptyState';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Haptics, NotificationType } from '@capacitor/haptics';
 
 interface OverviewScreenProps {
   isLoading?: boolean;
@@ -45,6 +47,7 @@ export const OverviewScreen: React.FC<OverviewScreenProps> = ({
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
+  const [subToDelete, setSubToDelete] = useState<Subscription | null>(null);
 
   // Close dropdown when clicking anywhere else
   React.useEffect(() => {
@@ -59,7 +62,7 @@ export const OverviewScreen: React.FC<OverviewScreenProps> = ({
 
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'paused'>('all');
-  const [showBudgetModal, setShowBudgetModal] = useState(false);
+  const [showBudgetModal, setShowBudgetModal] = useState<boolean>(false);
   const [tempBudget, setTempBudget] = useState<string>(monthlyBudgetGoal.toString());
 
   const activeSubs = subscriptions.filter((s) => s.status === 'active');
@@ -92,7 +95,13 @@ export const OverviewScreen: React.FC<OverviewScreenProps> = ({
   };
 
   return (
-    <main className="max-w-[768px] lg:max-w-[880px] mx-auto px-4 sm:px-6 py-4 pb-28 flex flex-col gap-6">
+    <motion.main
+      initial={{ opacity: 0, x: 10 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -10 }}
+      transition={{ duration: 0.15, ease: "easeInOut" }}
+      className="max-w-[768px] lg:max-w-[880px] mx-auto px-4 sm:px-6 py-4 pb-28 flex flex-col gap-6"
+    >
       {/* Hero Summary Card */}
       <section className="bg-[#0f172a] rounded-[24px] p-6 sm:p-7 shadow-subtrack-lg border border-[#1e293b] relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-[#3b82f6]/10 rounded-full blur-3xl pointer-events-none" />
@@ -395,15 +404,11 @@ export const OverviewScreen: React.FC<OverviewScreenProps> = ({
                           Editar
                         </button>
                         <button
-                          onClick={(e) => {
+                          onClick={async (e) => {
                             e.stopPropagation();
-                            console.log('ID a eliminar:', sub.id);
                             setActiveMenuId(null);
-                            if (onDeleteSubscription) {
-                              onDeleteSubscription(sub.id);
-                            } else {
-                              console.error('onDeleteSubscription prop no está definida');
-                            }
+                            await Haptics.notification({ type: NotificationType.Warning });
+                            setSubToDelete(sub);
                           }}
                           className="w-full text-left px-4 py-2.5 text-xs font-semibold text-[#ef4444] hover:bg-[#ef4444]/10 transition-colors flex items-center gap-2"
                         >
@@ -469,7 +474,47 @@ export const OverviewScreen: React.FC<OverviewScreenProps> = ({
           </div>
         </div>
       )}
-    </main>
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {subToDelete && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.2 }}
+              className="bg-[#0f172a] rounded-2xl p-6 max-w-sm w-full shadow-subtrack-lg border border-[#1e293b] text-center"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-[#ef4444]/20 text-[#ef4444] border border-[#ef4444]/30 flex items-center justify-center mx-auto mb-4">
+                <Trash2 className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-bold text-[#f1f5f9] mb-1">¿Eliminar suscripción? Esta acción no se puede deshacer.</h3>
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => setSubToDelete(null)}
+                  className="flex-1 py-2.5 rounded-xl border border-[#334155] text-xs font-semibold text-[#94a3b8] bg-[#1e293b] hover:bg-[#334155]"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={async () => {
+                    await Haptics.notification({ type: NotificationType.Warning });
+                    if (onDeleteSubscription) {
+                      onDeleteSubscription(subToDelete.id);
+                    }
+                    setSubToDelete(null);
+                  }}
+                  className="flex-1 py-2.5 rounded-xl bg-[#ef4444] text-white text-xs font-bold hover:bg-[#dc2626] shadow-sm"
+                >
+                  Eliminar
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+    </motion.main>
   );
 };
 

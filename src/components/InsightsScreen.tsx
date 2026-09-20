@@ -4,6 +4,7 @@ import { formatCurrency } from '../data/initialData';
 import { ArrowDown, Film, Briefcase, Zap, Heart, Code2, ChevronRight, Layers, Sparkles, ArrowLeft, Plus } from 'lucide-react';
 import { EmptyState } from './EmptyState';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
+import { motion } from 'framer-motion';
 
 interface InsightsScreenProps {
   isLoading?: boolean;
@@ -129,7 +130,13 @@ export const InsightsScreen: React.FC<InsightsScreenProps> = ({
   ];
 
   return (
-    <main className="max-w-[768px] lg:max-w-[880px] mx-auto px-4 sm:px-6 py-4 pb-28 flex flex-col gap-6">
+    <motion.main
+      initial={{ opacity: 0, x: 10 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -10 }}
+      transition={{ duration: 0.15, ease: "easeInOut" }}
+      className="max-w-[768px] lg:max-w-[880px] mx-auto px-4 sm:px-6 py-4 pb-28 flex flex-col gap-6"
+    >
 
 
       {/* Page Header */}
@@ -349,7 +356,7 @@ export const InsightsScreen: React.FC<InsightsScreenProps> = ({
           })}
         </div>
       </section>
-    </main>
+    </motion.main>
   );
 };
 

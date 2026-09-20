@@ -23,6 +23,7 @@ import { SettingsScreen } from './components/SettingsScreen';
 import { CheckCircle2, AlertCircle, ArrowLeft } from 'lucide-react';
 import { Preferences } from '@capacitor/preferences';
 import { LocalNotifications } from '@capacitor/local-notifications';
+import { AnimatePresence } from 'framer-motion';
 
 export default function App() {
   const navigate = useNavigate();
@@ -318,7 +319,8 @@ export default function App() {
       {/* Main Screen Views with Responsive Container */}
       <div className="flex-1 w-full max-w-[768px] lg:max-w-[1024px] mx-auto relative pb-24">
 
-        <Routes>
+        <AnimatePresence mode="wait">
+          <Routes location={location} key={location.pathname}>
           <Route path="/" element={<Navigate to={isAuthenticated ? "/payments" : "/login"} replace />} />
 
           {/* Auth Routes */}
@@ -471,6 +473,7 @@ export default function App() {
             ) : <Navigate to="/login" replace />
           } />
         </Routes>
+        </AnimatePresence>
       </div>
 
       {isAuthenticated && <BottomNav currentScreen={currentScreen} onNavigate={handleNavigate} />}
