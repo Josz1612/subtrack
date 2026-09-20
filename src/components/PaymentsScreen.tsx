@@ -107,14 +107,19 @@ export const PaymentsScreen: React.FC<PaymentsScreenProps> = ({
     }
   }
 
-  // Filter subscriptions based on selected calendar day (if selected)
-  const displayedUpcoming =
-    selectedDay === null
-      ? activeSubs
-      : activeSubs.filter((sub) => {
-          const dayNum = parseInt(sub.nextPaymentDate.split('-')[2] || '0', 10);
-          return dayNum === selectedDay;
-        });
+  // Filter subscriptions based on selected calendar day (if selected) or current viewing month
+  const displayedUpcoming = activeSubs.filter((sub) => {
+    const [yearStr, monthStr, dayStr] = sub.nextPaymentDate.split('-');
+    const subYear = parseInt(yearStr, 10);
+    const subMonth = parseInt(monthStr, 10) - 1; // 0-indexed month
+    const subDay = parseInt(dayStr, 10);
+
+    if (selectedDay === null) {
+      return subMonth === currentMonthIndex && subYear === currentYear;
+    } else {
+      return subDay === selectedDay && subMonth === currentMonthIndex && subYear === currentYear;
+    }
+  });
 
   const filteredHistory = history.filter((item) => {
     if (historyFilter === 'all') return true;
