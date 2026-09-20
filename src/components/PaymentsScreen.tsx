@@ -45,8 +45,8 @@ export const PaymentsScreen: React.FC<PaymentsScreenProps> = ({
   onShowToast,
   onBack,
 }) => {
-  const [selectedDay, setSelectedDay] = useState<number | null>(15);
-  const [currentMonthIndex, setCurrentMonthIndex] = useState<number>(10); // 10 = Nov
+  const [selectedDay, setSelectedDay] = useState<number | null>(new Date().getDate());
+  const [currentMonthIndex, setCurrentMonthIndex] = useState<number>(new Date().getMonth());
   const [selectedReceipt, setSelectedReceipt] = useState<PaymentHistoryItem | null>(null);
   const [historyFilter, setHistoryFilter] = useState<'all' | 'Paid' | 'Pending'>('all');
 
