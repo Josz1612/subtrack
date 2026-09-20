@@ -52,14 +52,20 @@ export default function App() {
         }
 
         const userPref = await Preferences.get({ key: 'subtrack_user' });
-        if (userPref.value) {
-          const parsedUser = JSON.parse(userPref.value);
-          // Limpieza de caché requerida: si es MXN y el límite es irreal, forzar a 150
-          if (parsedUser.preferredCurrency === 'MXN' && parsedUser.monthlyBudgetGoal > 500) {
-            parsedUser.monthlyBudgetGoal = 150.0;
-          }
-          setUser(parsedUser);
+        let parsedUser = userPref.value ? JSON.parse(userPref.value) : INITIAL_USER_PROFILE;
+        
+        // Limpieza de caché requerida: si es MXN y el límite es irreal, forzar a 150
+        if (parsedUser.preferredCurrency === 'MXN' && parsedUser.monthlyBudgetGoal > 500) {
+          parsedUser.monthlyBudgetGoal = 150.0;
         }
+
+        const accountPref = await Preferences.get({ key: 'user_account' });
+        if (accountPref.value) {
+          const accountData = JSON.parse(accountPref.value);
+          parsedUser.name = accountData.name || parsedUser.name;
+        }
+
+        setUser(parsedUser);
 
         const subsPref = await Preferences.get({ key: 'subtrack_subscriptions' });
         if (subsPref.value) setSubscriptions(JSON.parse(subsPref.value));

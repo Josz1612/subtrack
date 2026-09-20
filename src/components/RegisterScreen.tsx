@@ -36,8 +36,8 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
     }
 
     try {
-      await Preferences.set({ key: 'subtrack_local_email', value: email });
-      await Preferences.set({ key: 'subtrack_local_password', value: password });
+      const userData = { email, password, name: fullName };
+      await Preferences.set({ key: 'user_account', value: JSON.stringify(userData) });
       await Preferences.set({ key: 'isLoggedIn', value: 'true' });
       
       onRegisterSubmit(fullName, email);

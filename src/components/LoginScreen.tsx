@@ -56,15 +56,19 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
     }
 
     try {
-      const savedEmailPref = await Preferences.get({ key: 'subtrack_local_email' });
-      const savedPasswordPref = await Preferences.get({ key: 'subtrack_local_password' });
+      const accountPref = await Preferences.get({ key: 'user_account' });
 
-      if (savedEmailPref.value === email && savedPasswordPref.value === password) {
-        // Credenciales correctas
-        await Preferences.set({ key: 'isLoggedIn', value: 'true' });
-        onLoginSuccess();
+      if (accountPref.value) {
+        const account = JSON.parse(accountPref.value);
+        if (account.email === email && account.password === password) {
+          // Credenciales correctas
+          await Preferences.set({ key: 'isLoggedIn', value: 'true' });
+          onLoginSuccess();
+        } else {
+          setError('Correo o contraseña incorrectos.');
+        }
       } else {
-        setError('Correo o contraseña incorrectos.');
+        setError('No existe una cuenta registrada. Por favor regístrate.');
       }
     } catch (err) {
       setError('Ocurrió un error al intentar iniciar sesión.');
