@@ -59,10 +59,18 @@ export default function App() {
           parsedUser.monthlyBudgetGoal = 150.0;
         }
 
-        const accountPref = await Preferences.get({ key: 'user_account' });
-        if (accountPref.value) {
-          const accountData = JSON.parse(accountPref.value);
-          parsedUser.name = accountData.name || parsedUser.name;
+        const { value } = await Preferences.get({ key: 'user_account' });
+        if (value) {
+          if (value === 'undefined' || value === 'null' || value === '[object Object]') {
+            throw new Error('Datos inválidos');
+          }
+          try {
+            const accountData = JSON.parse(value);
+            parsedUser.name = accountData.name || parsedUser.name;
+          } catch (parseError) {
+            await Preferences.remove({ key: 'user_account' });
+            throw new Error('Corrupción de JSON eliminada');
+          }
         }
 
         setUser(parsedUser);
@@ -74,6 +82,8 @@ export default function App() {
         if (histPref.value) setHistory(JSON.parse(histPref.value));
       } catch (error) {
         console.error('Error loading preferences:', error);
+        setUser(INITIAL_USER_PROFILE);
+        setIsAuthenticated(false);
       } finally {
         setIsInitializing(false);
       }
@@ -134,17 +144,17 @@ export default function App() {
   };
 
   useEffect(() => {
-    if (!isLoading) {
+    if (!isInitializing) {
       Preferences.set({ key: 'subtrack_subscriptions', value: JSON.stringify(subscriptions) });
       schedulePaymentNotifications(subscriptions);
     }
-  }, [subscriptions, isLoading]);
+  }, [subscriptions, isInitializing]);
 
   useEffect(() => {
-    if (!isLoading) {
+    if (!isInitializing) {
       Preferences.set({ key: 'subtrack_history', value: JSON.stringify(history) });
     }
-  }, [history, isLoading]);
+  }, [history, isInitializing]);
 
   const showToast = (text: string, type: 'success' | 'info' | 'error' = 'success') => {
     if (type === 'success') toast.success(text);
