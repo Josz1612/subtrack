@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { GOOGLE_ICON_URL, APPLE_ICON_URL } from '../data/initialData';
 import { SubTrackLogo } from './SubTrackLogo';
 import { User, Mail, Lock, Eye, EyeOff, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Preferences } from '@capacitor/preferences';
 
 interface RegisterScreenProps {
   onRegisterSubmit: (name: string, email: string) => void;
@@ -23,17 +24,26 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!fullName.trim() || !email.trim()) {
-      setError('Por favor completa tu nombre y correo electrónico.');
+    if (!fullName.trim() || !email.trim() || !password) {
+      setError('Por favor completa todos los campos requeridos.');
       return;
     }
-    if (password && confirmPassword && password !== confirmPassword) {
+    if (password !== confirmPassword) {
       setError('Las contraseñas no coinciden.');
       return;
     }
-    onRegisterSubmit(fullName, email);
+
+    try {
+      await Preferences.set({ key: 'subtrack_local_email', value: email });
+      await Preferences.set({ key: 'subtrack_local_password', value: password });
+      await Preferences.set({ key: 'isLoggedIn', value: 'true' });
+      
+      onRegisterSubmit(fullName, email);
+    } catch (err) {
+      setError('Ocurrió un error al guardar las credenciales.');
+    }
   };
 
   return (
@@ -142,39 +152,19 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
 
           <button
             type="submit"
-            className="w-full bg-[#3b82f6] hover:bg-[#2563eb] text-white font-bold text-sm sm:text-base py-3.5 rounded-xl shadow-blue-glow flex items-center justify-center gap-2 transition-all active:scale-[0.98] mt-6 min-h-[48px] touch-manipulation cursor-pointer"
+            disabled={!fullName.trim() || !email.trim() || !password || !confirmPassword || password !== confirmPassword}
+            className={`w-full text-white font-bold text-sm sm:text-base py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all mt-6 min-h-[48px] touch-manipulation ${
+              !fullName.trim() || !email.trim() || !password || !confirmPassword || password !== confirmPassword
+                ? 'bg-[#334155] cursor-not-allowed opacity-50'
+                : 'bg-[#3b82f6] hover:bg-[#2563eb] shadow-blue-glow active:scale-[0.98]'
+            }`}
           >
             <span>Crear Cuenta</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </form>
 
-        {/* Social Login Divider */}
-        <div className="flex items-center gap-4 my-6">
-          <div className="h-px flex-1 bg-[#1e293b]" />
-          <span className="text-xs font-medium text-[#64748b]">O regístrate con</span>
-          <div className="h-px flex-1 bg-[#1e293b]" />
-        </div>
 
-        {/* Social Buttons */}
-        <div className="grid grid-cols-2 gap-3">
-          <button
-            type="button"
-            onClick={onGoogleSignIn}
-            className="flex items-center justify-center gap-2 py-3 bg-[#131d35] border border-[#1e293b] rounded-xl hover:bg-[#1e293b] transition-colors active:scale-95 text-xs font-bold text-[#f1f5f9] min-h-[46px] touch-manipulation"
-          >
-            <img src={GOOGLE_ICON_URL} alt="Google" className="w-4 h-4 object-contain" referrerPolicy="no-referrer" />
-            <span>Google</span>
-          </button>
-          <button
-            type="button"
-            onClick={onAppleSignIn}
-            className="flex items-center justify-center gap-2 py-3 bg-[#131d35] border border-[#1e293b] rounded-xl hover:bg-[#1e293b] transition-colors active:scale-95 text-xs font-bold text-[#f1f5f9] min-h-[46px] touch-manipulation"
-          >
-            <img src={APPLE_ICON_URL} alt="Apple" className="w-4 h-4 object-contain" referrerPolicy="no-referrer" />
-            <span>Apple</span>
-          </button>
-        </div>
 
         {/* Footer Link */}
         <div className="text-center mt-6 flex items-center justify-center gap-1.5">

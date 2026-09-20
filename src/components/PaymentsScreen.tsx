@@ -18,6 +18,7 @@ import {
   CalendarDays,
 } from 'lucide-react';
 import { EmptyState } from './EmptyState';
+import { CapacitorCalendar } from '@capgo/capacitor-calendar';
 
 interface PaymentsScreenProps {
   isLoading?: boolean;
@@ -118,12 +119,44 @@ export const PaymentsScreen: React.FC<PaymentsScreenProps> = ({
     return item.status === historyFilter;
   });
 
+  const syncToNativeCalendar = async () => {
+    try {
+      await CapacitorCalendar.requestAllPermissions();
+      
+      const activeSubs = subscriptions.filter(s => s.status === 'active');
+      for (const sub of activeSubs) {
+        const startDate = new Date(sub.nextPaymentDate).getTime();
+        const endDate = startDate + 3600000; // + 1 hour
+
+        await CapacitorCalendar.createEvent({
+          title: 'Pago de ' + sub.name,
+          startDate: startDate,
+          endDate: endDate,
+        });
+      }
+      
+      if (onShowToast) onShowToast('Eventos sincronizados con tu calendario', 'success');
+    } catch (error) {
+      console.error('Error sincronizando calendario:', error);
+      if (onShowToast) onShowToast('Error al sincronizar o permiso denegado', 'error');
+    }
+  };
+
   return (
     <main className="max-w-[768px] lg:max-w-[880px] mx-auto px-4 sm:px-6 py-4 pb-28 flex flex-col gap-8">
 
 
       {/* Calendar Section */}
       <section className="flex flex-col gap-3">
+        
+        <button
+          onClick={syncToNativeCalendar}
+          className="w-full bg-[#1e293b] hover:bg-[#334155] text-[#3b82f6] border border-[#3b82f6]/30 text-xs sm:text-sm font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 touch-manipulation shadow-subtrack mb-2"
+        >
+          <CalendarIcon className="w-4 h-4" />
+          <span>Vincular al Calendario del celular</span>
+        </button>
+
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <h2 className="text-xl font-bold text-[#f1f5f9] tracking-tight">

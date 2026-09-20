@@ -19,7 +19,7 @@ export const INITIAL_USER_PROFILE: UserProfile = {
   name: 'Alex Smith',
   email: 'alex.smith@gmail.com',
   avatarUrl: ALEX_AVATAR_URL,
-  preferredCurrency: 'USD',
+  preferredCurrency: 'MXN',
   monthlyBudgetGoal: 150.0,
   budgetGoalEnabled: true,
   notification1Day: true,

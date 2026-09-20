@@ -10,6 +10,7 @@ import {
 import { Header } from './components/Header';
 import { BottomNav } from './components/BottomNav';
 import { RegisterScreen } from './components/RegisterScreen';
+import { LoginScreen } from './components/LoginScreen';
 import { GoogleAccountSelectScreen } from './components/GoogleAccountSelectScreen';
 import { GoogleConsentScreen } from './components/GoogleConsentScreen';
 import { OnboardingScreen } from './components/OnboardingScreen';
@@ -31,18 +32,30 @@ export default function App() {
   const [editingSub, setEditingSub] = useState<Subscription | null>(null);
   const [tempGoogleEmail, setTempGoogleEmail] = useState<string>('alex.smith@gmail.com');
   const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // Load / Persist State
   const [user, setUser] = useState<UserProfile>(INITIAL_USER_PROFILE);
   const [subscriptions, setSubscriptions] = useState<Subscription[]>(INITIAL_SUBSCRIPTIONS);
   const [history, setHistory] = useState<PaymentHistoryItem[]>(INITIAL_PAYMENT_HISTORY);
 
-  // Load preferences asynchronously on mount
   useEffect(() => {
     const loadPreferences = async () => {
       try {
+        const authPref = await Preferences.get({ key: 'isLoggedIn' });
+        if (authPref.value === 'true') {
+          setIsAuthenticated(true);
+        }
+
         const userPref = await Preferences.get({ key: 'subtrack_user' });
-        if (userPref.value) setUser(JSON.parse(userPref.value));
+        if (userPref.value) {
+          const parsedUser = JSON.parse(userPref.value);
+          // Limpieza de caché requerida: si es MXN y el límite es irreal, forzar a 150
+          if (parsedUser.preferredCurrency === 'MXN' && parsedUser.monthlyBudgetGoal > 500) {
+            parsedUser.monthlyBudgetGoal = 150.0;
+          }
+          setUser(parsedUser);
+        }
 
         const subsPref = await Preferences.get({ key: 'subtrack_subscriptions' });
         if (subsPref.value) setSubscriptions(JSON.parse(subsPref.value));
@@ -225,9 +238,11 @@ export default function App() {
     handleNavigate('payments');
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await Preferences.remove({ key: 'isLoggedIn' });
+    setIsAuthenticated(false);
     showToast('Sesión cerrada correctamente', 'info');
-    handleNavigate('register');
+    handleNavigate('login');
   };
 
   return (
@@ -245,26 +260,48 @@ export default function App() {
         }}
       />
 
-      {/* Top Application Header */}
-      <Header
-        user={user}
-        onAddNew={handleAddNew}
-        onShowToast={showToast}
-      />
+      {isAuthenticated && (
+        <Header
+          user={user}
+          onAddNew={handleAddNew}
+          onShowToast={showToast}
+        />
+      )}
 
       {/* Main Screen Views with Responsive Container */}
       <div className="flex-1 w-full max-w-[768px] lg:max-w-[1024px] mx-auto relative pb-24">
 
         <Routes>
-          <Route path="/" element={<Navigate to="/payments" replace />} />
+          <Route path="/" element={<Navigate to={isAuthenticated ? "/payments" : "/login"} replace />} />
+
+          {/* Auth Routes */}
+          <Route path="/login" element={
+            !isAuthenticated ? (
+              <LoginScreen
+                onLoginSuccess={() => {
+                  setIsAuthenticated(true);
+                  handleNavigate('payments');
+                }}
+                onGoToRegister={() => handleNavigate('register')}
+                onGoogleSignIn={handleGoogleSignIn}
+                onAppleSignIn={() => handleNavigate('onboarding')}
+              />
+            ) : <Navigate to="/payments" replace />
+          } />
 
           <Route path="/register" element={
-            <RegisterScreen
-              onRegisterSubmit={handleRegisterSubmit}
-              onGoogleSignIn={handleGoogleSignIn}
-              onAppleSignIn={() => handleNavigate('onboarding')}
-              onGoToSignIn={() => handleNavigate('google_select')}
-            />
+            !isAuthenticated ? (
+              <RegisterScreen
+                onRegisterSubmit={(name, email) => {
+                  handleRegisterSubmit(name, email);
+                  setIsAuthenticated(true);
+                  handleNavigate('payments');
+                }}
+                onGoogleSignIn={handleGoogleSignIn}
+                onAppleSignIn={() => handleNavigate('onboarding')}
+                onGoToSignIn={() => handleNavigate('login')}
+              />
+            ) : <Navigate to="/payments" replace />
           } />
 
           <Route path="/google_select" element={
@@ -290,93 +327,106 @@ export default function App() {
             />
           } />
 
+          {/* Protected Routes */}
           <Route path="/payments" element={
-            <PaymentsScreen
-              isLoading={isLoading}
-              subscriptions={subscriptions}
-              history={history}
-              currency={user.preferredCurrency}
-              onSelectSubscription={handleSelectSubscription}
-              onAddNew={handleAddNew}
-              onRecordPayment={handleRecordPayment}
-              onShowToast={showToast}
-            />
+            isAuthenticated ? (
+              <PaymentsScreen
+                isLoading={isLoading}
+                subscriptions={subscriptions}
+                history={history}
+                currency={user.preferredCurrency}
+                onSelectSubscription={handleSelectSubscription}
+                onAddNew={handleAddNew}
+                onRecordPayment={handleRecordPayment}
+                onShowToast={showToast}
+              />
+            ) : <Navigate to="/login" replace />
           } />
 
           <Route path="/overview" element={
-            <OverviewScreen
-              isLoading={isLoading}
-              subscriptions={subscriptions}
-              currency={user.preferredCurrency}
-              monthlyBudgetGoal={user.monthlyBudgetGoal}
-              onSelectSubscription={handleSelectSubscription}
-              onAddNew={handleAddNew}
-              onUpdateBudget={(newGoal) => {
-                setUser((prev) => ({ ...prev, monthlyBudgetGoal: newGoal }));
-                showToast(`Presupuesto actualizado a $${newGoal}`);
-              }}
-              onNavigate={(s) => handleNavigate(s)}
-              onEditSubscription={handleEditSubscription}
-              onDeleteSubscription={handleCancelSubscription}
-            />
+            isAuthenticated ? (
+              <OverviewScreen
+                isLoading={isLoading}
+                subscriptions={subscriptions}
+                currency={user.preferredCurrency}
+                monthlyBudgetGoal={user.monthlyBudgetGoal}
+                onSelectSubscription={handleSelectSubscription}
+                onAddNew={handleAddNew}
+                onUpdateBudget={(newGoal) => {
+                  setUser((prev) => ({ ...prev, monthlyBudgetGoal: newGoal }));
+                  showToast(`Presupuesto actualizado a $${newGoal}`);
+                }}
+                onNavigate={(s) => handleNavigate(s)}
+                onEditSubscription={handleEditSubscription}
+                onDeleteSubscription={handleCancelSubscription}
+              />
+            ) : <Navigate to="/login" replace />
           } />
 
           <Route path="/insights" element={
-            <InsightsScreen
-              isLoading={isLoading}
-              subscriptions={subscriptions}
-              currency={user.preferredCurrency}
-              onSelectCategory={(cat) => {
-                showToast(`Filtrando categoría: ${cat}`, 'info');
-              }}
-              onAddNew={handleAddNew}
-              onShowToast={showToast}
-            />
+            isAuthenticated ? (
+              <InsightsScreen
+                isLoading={isLoading}
+                subscriptions={subscriptions}
+                currency={user.preferredCurrency}
+                onSelectCategory={(cat) => {
+                  showToast(`Filtrando categoría: ${cat}`, 'info');
+                }}
+                onAddNew={handleAddNew}
+                onShowToast={showToast}
+              />
+            ) : <Navigate to="/login" replace />
           } />
 
           <Route path="/detail" element={
-            selectedSub ? (
-              <SubscriptionDetailScreen
-                subscription={selectedSub}
-                currency={user.preferredCurrency}
-                onEdit={handleEditSubscription}
-                onCancelSub={handleCancelSubscription}
-                onTogglePause={handleTogglePauseSubscription}
-                onRecordPayment={handleRecordPayment}
-                onBack={() => navigate(-1)}
-              />
-            ) : <Navigate to="/payments" replace />
+            isAuthenticated ? (
+              selectedSub ? (
+                <SubscriptionDetailScreen
+                  subscription={selectedSub}
+                  currency={user.preferredCurrency}
+                  onEdit={handleEditSubscription}
+                  onCancelSub={handleCancelSubscription}
+                  onTogglePause={handleTogglePauseSubscription}
+                  onRecordPayment={handleRecordPayment}
+                  onBack={() => navigate(-1)}
+                />
+              ) : <Navigate to="/payments" replace />
+            ) : <Navigate to="/login" replace />
           } />
 
           <Route path="/new_subscription" element={
-            <NewSubscriptionModal
-              subscriptionToEdit={editingSub}
-              currency={user.preferredCurrency}
-              onSave={handleSaveSubscription}
-              onClose={() => navigate(-1)}
-            />
+            isAuthenticated ? (
+              <NewSubscriptionModal
+                subscriptionToEdit={editingSub}
+                currency={user.preferredCurrency}
+                onSave={handleSaveSubscription}
+                onClose={() => navigate(-1)}
+              />
+            ) : <Navigate to="/login" replace />
           } />
 
           <Route path="/settings" element={
-            <SettingsScreen
-              user={user}
-              subscriptions={subscriptions}
-              onUpdateUser={(updated) => {
-                setUser((prev) => ({ ...prev, ...updated }));
-                showToast('Ajustes guardados con éxito');
-              }}
-              onLogout={handleLogout}
-              onShowToast={showToast}
-              onImportSubscriptions={(importedSubs) => {
-                setSubscriptions(importedSubs);
-                showToast('Datos importados con éxito');
-              }}
-            />
+            isAuthenticated ? (
+              <SettingsScreen
+                user={user}
+                subscriptions={subscriptions}
+                onUpdateUser={(updated) => {
+                  setUser((prev) => ({ ...prev, ...updated }));
+                  showToast('Ajustes guardados con éxito');
+                }}
+                onLogout={handleLogout}
+                onShowToast={showToast}
+                onImportSubscriptions={(importedSubs) => {
+                  setSubscriptions(importedSubs);
+                  showToast('Datos importados con éxito');
+                }}
+              />
+            ) : <Navigate to="/login" replace />
           } />
         </Routes>
       </div>
 
-      <BottomNav currentScreen={currentScreen} onNavigate={handleNavigate} />
+      {isAuthenticated && <BottomNav currentScreen={currentScreen} onNavigate={handleNavigate} />}
     </div>
   );
 };

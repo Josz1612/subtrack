@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { UserProfile, Subscription, Currency } from '../types';
 import { formatCurrency } from '../data/initialData';
 import { SubTrackLogo } from './SubTrackLogo';
+import { convertAmount } from '../utils/currency';
 import {
   CreditCard,
   Target,
@@ -479,7 +480,11 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 <button
                   key={curr}
                   onClick={() => {
-                    onUpdateUser({ preferredCurrency: curr });
+                    const newBudget = convertAmount(150.0, 'MXN', curr);
+                    onUpdateUser({ 
+                      preferredCurrency: curr,
+                      monthlyBudgetGoal: newBudget
+                    });
                     setShowCurrencyModal(false);
                   }}
                   className={`w-full p-3 rounded-xl text-left text-xs font-bold flex items-center justify-between transition-colors touch-manipulation min-h-[44px] ${
