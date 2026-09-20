@@ -54,9 +54,9 @@ export default function App() {
         const userPref = await Preferences.get({ key: 'subtrack_user' });
         let parsedUser = userPref.value ? JSON.parse(userPref.value) : INITIAL_USER_PROFILE;
         
-        // Limpieza de caché requerida: si es MXN y el límite es irreal, forzar a 150
-        if (parsedUser.preferredCurrency === 'MXN' && parsedUser.monthlyBudgetGoal > 500) {
-          parsedUser.monthlyBudgetGoal = 150.0;
+        // Saneamiento: si el presupuesto es corrupto (< 1), forzar a 3000 MXN
+        if (!parsedUser.monthlyBudgetGoal || parsedUser.monthlyBudgetGoal < 1) {
+          parsedUser.monthlyBudgetGoal = 3000.0;
         }
 
         const { value } = await Preferences.get({ key: 'user_account' });

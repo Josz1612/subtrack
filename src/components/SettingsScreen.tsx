@@ -254,11 +254,12 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             <div 
               className="flex items-center gap-3.5 cursor-pointer active:scale-95 transition-all touch-manipulation"
               onClick={() => {
-                const val = window.prompt('Ingresa tu nuevo presupuesto mensual (en tu moneda base, MXN):');
+                const val = window.prompt(`Ingresa tu nuevo presupuesto mensual (en ${user.preferredCurrency}):`);
                 if (val !== null) {
                   const parsed = parseFloat(val);
                   if (!isNaN(parsed) && parsed > 0) {
-                    onUpdateUser({ monthlyBudgetGoal: parsed });
+                    const mxnBudget = convertAmount(parsed, user.preferredCurrency as any, 'MXN');
+                    onUpdateUser({ monthlyBudgetGoal: mxnBudget });
                     if (onShowToast) onShowToast('Presupuesto actualizado correctamente', 'success');
                   } else {
                     if (onShowToast) onShowToast('Por favor ingresa un número válido mayor a 0', 'error');
