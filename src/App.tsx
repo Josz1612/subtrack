@@ -33,7 +33,7 @@ export default function App() {
   const [selectedSub, setSelectedSub] = useState<Subscription | null>(INITIAL_SUBSCRIPTIONS[0]);
   const [editingSub, setEditingSub] = useState<Subscription | null>(null);
   const [tempGoogleEmail, setTempGoogleEmail] = useState<string>('alex.smith@gmail.com');
-  const [isLoading, setIsLoading] = useState(true);
+  const [isInitializing, setIsInitializing] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // Load / Persist State
@@ -75,7 +75,7 @@ export default function App() {
       } catch (error) {
         console.error('Error loading preferences:', error);
       } finally {
-        setIsLoading(false);
+        setIsInitializing(false);
       }
     };
     loadPreferences();
@@ -83,10 +83,10 @@ export default function App() {
 
   // Save state on change
   useEffect(() => {
-    if (!isLoading) {
+    if (!isInitializing) {
       Preferences.set({ key: 'subtrack_user', value: JSON.stringify(user) });
     }
-  }, [user, isLoading]);
+  }, [user, isInitializing]);
 
   useEffect(() => {
     const requestNotifPermissions = async () => {
@@ -301,6 +301,19 @@ export default function App() {
     handleNavigate('login');
   };
 
+  if (isInitializing) {
+    return (
+      <div className="w-full min-h-screen bg-[#070b14] flex flex-col items-center justify-center p-4">
+        <div className="w-24 h-24 rounded-3xl overflow-hidden shadow-blue-glow bg-[#131d35] p-3 border border-[#1e293b] flex items-center justify-center animate-pulse">
+          <div className="text-[#3b82f6] w-full h-full font-bold flex items-center justify-center">...</div>
+        </div>
+        <div className="mt-8 text-[#94a3b8] text-sm font-semibold animate-pulse">
+          Iniciando SubTrack...
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full min-h-screen bg-[#090d16] text-[#f1f5f9] selection:bg-[#3b82f6] selection:text-white antialiased font-sans flex flex-col relative overflow-x-hidden">
       <Toaster
@@ -388,7 +401,7 @@ export default function App() {
           <Route path="/payments" element={
             isAuthenticated ? (
               <PaymentsScreen
-                isLoading={isLoading}
+                isLoading={isInitializing}
                 subscriptions={subscriptions}
                 history={history}
                 currency={user.preferredCurrency}
@@ -403,7 +416,7 @@ export default function App() {
           <Route path="/overview" element={
             isAuthenticated ? (
               <OverviewScreen
-                isLoading={isLoading}
+                isLoading={isInitializing}
                 subscriptions={subscriptions}
                 currency={user.preferredCurrency}
                 monthlyBudgetGoal={user.monthlyBudgetGoal}
@@ -423,7 +436,7 @@ export default function App() {
           <Route path="/insights" element={
             isAuthenticated ? (
               <InsightsScreen
-                isLoading={isLoading}
+                isLoading={isInitializing}
                 subscriptions={subscriptions}
                 currency={user.preferredCurrency}
                 onSelectCategory={(cat) => {
