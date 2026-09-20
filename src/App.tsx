@@ -303,14 +303,7 @@ export default function App() {
 
   if (isInitializing) {
     return (
-      <div className="w-full min-h-screen bg-[#070b14] flex flex-col items-center justify-center p-4">
-        <div className="w-24 h-24 rounded-3xl overflow-hidden shadow-blue-glow bg-[#131d35] p-3 border border-[#1e293b] flex items-center justify-center animate-pulse">
-          <div className="text-[#3b82f6] w-full h-full font-bold flex items-center justify-center">...</div>
-        </div>
-        <div className="mt-8 text-[#94a3b8] text-sm font-semibold animate-pulse">
-          Iniciando SubTrack...
-        </div>
-      </div>
+      <div className="flex h-screen items-center justify-center bg-slate-900 text-white text-xl">Cargando...</div>
     );
   }
 
