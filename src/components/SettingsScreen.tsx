@@ -23,6 +23,8 @@ import {
 } from 'lucide-react';
 import { Preferences } from '@capacitor/preferences';
 import { NativeBiometric } from '@capgo/capacitor-native-biometric';
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
 
 interface SettingsScreenProps {
   user: UserProfile;
@@ -95,23 +97,28 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
     }
   };
 
-  const handleExportData = () => {
-    // Solo exportar el array de suscripciones según requerimiento
-    const dataStr = JSON.stringify(subscriptions, null, 2);
-    const blob = new Blob([dataStr], {
-      type: 'application/json',
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `subtrack-backup.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    if (onShowToast) {
-      onShowToast('¡Datos exportados con éxito en formato JSON!');
-    } else {
-      setExportMessage('¡Datos exportados con éxito en formato JSON!');
-      setTimeout(() => setExportMessage(''), 3500);
+  const handleExportData = async () => {
+    try {
+      const dataStr = JSON.stringify(subscriptions, null, 2);
+      const result = await Filesystem.writeFile({
+        path: 'subtrack_backup.json',
+        data: dataStr,
+        directory: Directory.Cache,
+      });
+
+      await Share.share({
+        title: 'Respaldo SubTrack',
+        url: result.uri,
+      });
+
+      if (onShowToast) {
+        onShowToast('¡Datos preparados para exportar con éxito!', 'success');
+      }
+    } catch (e) {
+      console.error(e);
+      if (onShowToast) {
+        onShowToast('Error al exportar datos', 'error');
+      }
     }
   };
 
@@ -128,6 +135,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         if (Array.isArray(data)) {
           if (onImportSubscriptions) {
             onImportSubscriptions(data);
+            setTimeout(() => window.location.reload(), 1500); // Recargar pantalla para mostrar
           }
         } else {
           throw new Error("Formato de JSON inválido");

@@ -22,6 +22,7 @@ import { NewSubscriptionModal } from './components/NewSubscriptionModal';
 import { SettingsScreen } from './components/SettingsScreen';
 import { CheckCircle2, AlertCircle, ArrowLeft } from 'lucide-react';
 import { Preferences } from '@capacitor/preferences';
+import { LocalNotifications } from '@capacitor/local-notifications';
 
 export default function App() {
   const navigate = useNavigate();
@@ -79,8 +80,54 @@ export default function App() {
   }, [user, isLoading]);
 
   useEffect(() => {
+    const requestNotifPermissions = async () => {
+      try {
+        await LocalNotifications.requestPermissions();
+      } catch (err) {
+        console.log("LocalNotifications permissions error:", err);
+      }
+    };
+    requestNotifPermissions();
+  }, []);
+
+  const schedulePaymentNotifications = async (subs: Subscription[]) => {
+    try {
+      const pending = await LocalNotifications.getPending();
+      if (pending.notifications.length > 0) {
+        await LocalNotifications.cancel(pending);
+      }
+
+      const activeSubs = subs.filter(s => s.status === 'active');
+      const notificationsToSchedule = activeSubs.map((sub, index) => {
+        const notifDate = new Date(sub.nextPaymentDate);
+        notifDate.setDate(notifDate.getDate() - 1); // 1 día antes
+        notifDate.setHours(10, 0, 0, 0); // a las 10:00 AM
+
+        // Si la fecha ya pasó, no la programamos (se asume que nextPaymentDate avanzará cuando pague)
+        if (notifDate.getTime() < Date.now()) {
+          notifDate.setMonth(notifDate.getMonth() + 1);
+        }
+
+        return {
+          id: index + 1,
+          title: `Pago próximo: ${sub.name}`,
+          body: `Se cobrarán ${sub.amount} mañana.`,
+          schedule: { at: notifDate }
+        };
+      });
+
+      if (notificationsToSchedule.length > 0) {
+        await LocalNotifications.schedule({ notifications: notificationsToSchedule });
+      }
+    } catch (e) {
+      console.log('Error scheduling notifications', e);
+    }
+  };
+
+  useEffect(() => {
     if (!isLoading) {
       Preferences.set({ key: 'subtrack_subscriptions', value: JSON.stringify(subscriptions) });
+      schedulePaymentNotifications(subscriptions);
     }
   }, [subscriptions, isLoading]);
 
