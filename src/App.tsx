@@ -193,7 +193,7 @@ export default function App() {
       showToast(`¡Suscripción "${subData.name}" agregada!`);
     }
     setEditingSub(null);
-    handleNavigate('payments');
+    handleNavigate('overview');
   };
 
   const handleCancelSubscription = (subId: string) => {
@@ -280,6 +280,7 @@ export default function App() {
     }
 
     showToast(`¡Pago de ${sub.name} registrado con éxito!`);
+    handleNavigate('overview');
 
     (async () => {
       try {

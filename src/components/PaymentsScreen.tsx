@@ -129,7 +129,7 @@ export const PaymentsScreen: React.FC<PaymentsScreenProps> = ({
   const syncToNativeCalendar = async () => {
     try {
       // Solicitar permisos de escritura y lectura
-      const result = await CapacitorCalendar.requestPermissions();
+      const result = await CapacitorCalendar.requestPermission();
       
       // La clave exacta del resultado de permisos depende de la versión del plugin (writeCalendar o readCalendar)
       if (result.writeCalendar === 'granted' || result.readCalendar === 'granted' || result.calendar === 'granted') {

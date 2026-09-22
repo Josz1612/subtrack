@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { SubTrackLogo } from './SubTrackLogo';
 import { Currency, UserProfile } from '../types';
 import { User, Mail, DollarSign, ArrowRight, Info, CheckCircle2 } from 'lucide-react';
+import { CustomDropdown } from './CustomDropdown';
 
 interface OnboardingScreenProps {
   user: UserProfile;
@@ -27,7 +28,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
     onFinishOnboarding({
       name: name || user.name,
       preferredCurrency: currency,
-      monthlyBudgetGoal: parseFloat(budget) || 150,
+      monthlyBudgetGoal: parseFloat(budget) || 3000,
     });
   };
 
@@ -108,16 +109,16 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
               <label className="block text-xs font-semibold text-[#cbd5e1] mb-1">
                 Moneda Principal
               </label>
-              <select
+              <CustomDropdown
                 value={currency}
-                onChange={(e) => setCurrency(e.target.value as Currency)}
-                className="w-full bg-[#131d35] border border-[#1e293b] rounded-xl py-2.5 px-4 text-xs sm:text-sm text-[#f1f5f9] focus:outline-none focus:border-[#3b82f6] focus:ring-2 focus:ring-[#3b82f6]/20 min-h-[44px]"
-              >
-                <option value="USD">USD ($) - Dólar Estadounidense</option>
-                <option value="EUR">EUR (€) - Euro</option>
-                <option value="MXN">MXN ($) - Peso Mexicano</option>
-                <option value="GBP">GBP (£) - Libra Esterlina</option>
-              </select>
+                onChange={(val) => setCurrency(val as Currency)}
+                options={[
+                  { value: 'USD', label: 'USD ($) - Dólar Estadounidense' },
+                  { value: 'EUR', label: 'EUR (€) - Euro' },
+                  { value: 'MXN', label: 'MXN ($) - Peso Mexicano' },
+                  { value: 'GBP', label: 'GBP (£) - Libra Esterlina' }
+                ]}
+              />
             </div>
 
             <div>
@@ -134,7 +135,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
                   min="0"
                   value={budget}
                   onChange={(e) => setBudget(e.target.value)}
-                  placeholder="150.00"
+                  placeholder="3000"
                   className="w-full bg-[#131d35] border border-[#1e293b] rounded-xl py-2.5 pl-8 pr-4 text-xs sm:text-sm text-[#f1f5f9] placeholder-[#64748b] focus:outline-none focus:border-[#3b82f6] focus:ring-2 focus:ring-[#3b82f6]/20 min-h-[44px]"
                 />
               </div>

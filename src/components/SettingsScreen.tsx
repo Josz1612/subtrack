@@ -550,7 +550,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 <button
                   key={curr}
                   onClick={() => {
-                    const newBudget = convertAmount(150.0, 'MXN', curr);
+                    const newBudget = convertAmount(3000.0, 'MXN', curr);
                     onUpdateUser({ 
                       preferredCurrency: curr,
                       monthlyBudgetGoal: newBudget

@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Subscription, Category, Currency, BillingCycle } from '../types';
 import { POPULAR_PRESETS } from '../data/initialData';
 import { SubTrackLogo } from './SubTrackLogo';
-import { X, Search, Dumbbell, Save, Plus } from 'lucide-react';
+import { ArrowLeft, Search, Plus, Radio, Dumbbell, ShieldAlert, ChevronDown, X, Save } from 'lucide-react';
+import { CustomDropdown } from './CustomDropdown';
+import { CustomDatePicker } from './CustomDatePicker';
 import { Haptics, NotificationType } from '@capacitor/haptics';
 
 interface NewSubscriptionModalProps {
@@ -51,6 +53,7 @@ export const NewSubscriptionModal: React.FC<NewSubscriptionModalProps> = ({
     setCategory(preset.category);
     setBillingCycle(preset.billingCycle);
     setPlanName(preset.defaultPlan);
+    setSubCurrency(preset.currency);
   };
 
   const filteredPresets = POPULAR_PRESETS.filter((p) =>
@@ -221,61 +224,58 @@ export const NewSubscriptionModal: React.FC<NewSubscriptionModalProps> = ({
 
             <div className="space-y-1.5">
               <label className="block text-xs font-medium text-[#94a3b8]">Moneda</label>
-              <select
+              <CustomDropdown
                 value={subCurrency}
-                onChange={(e) => setSubCurrency(e.target.value as Currency)}
-                className="w-full bg-[#131d35] border border-[#1e293b] rounded-xl py-3 px-3.5 text-sm text-[#f1f5f9] focus:outline-none focus:border-[#3b82f6]"
-              >
-                <option value="USD">USD ($)</option>
-                <option value="EUR">EUR (€)</option>
-                <option value="MXN">MXN ($)</option>
-                <option value="GBP">GBP (£)</option>
-              </select>
+                onChange={(val) => setSubCurrency(val as Currency)}
+                options={[
+                  { value: 'USD', label: 'USD ($)' },
+                  { value: 'EUR', label: 'EUR (€)' },
+                  { value: 'MXN', label: 'MXN ($)' },
+                  { value: 'GBP', label: 'GBP (£)' }
+                ]}
+              />
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <label className="block text-xs font-medium text-[#94a3b8]">Categoría</label>
-              <select
+              <CustomDropdown
                 value={category}
-                onChange={(e) => setCategory(e.target.value as Category)}
-                className="w-full bg-[#131d35] border border-[#1e293b] rounded-xl py-3 px-3.5 text-sm text-[#f1f5f9] focus:outline-none focus:border-[#3b82f6]"
-              >
-                <option value="Entertainment">Entertainment</option>
-                <option value="Productivity">Productivity</option>
-                <option value="Utilities">Utilities</option>
-                <option value="Health">Health & Fitness</option>
-                <option value="Developer">Developer</option>
-                <option value="Other">Otro</option>
-              </select>
+                onChange={(val) => setCategory(val as Category)}
+                options={[
+                  { value: 'Entertainment', label: 'Entertainment' },
+                  { value: 'Productivity', label: 'Productivity' },
+                  { value: 'Utilities', label: 'Utilities' },
+                  { value: 'Health', label: 'Health & Fitness' },
+                  { value: 'Developer', label: 'Developer' },
+                  { value: 'Other', label: 'Otro' }
+                ]}
+              />
             </div>
 
             <div className="space-y-1.5">
               <label className="block text-xs font-medium text-[#94a3b8]">
                 Ciclo de Facturación
               </label>
-              <select
+              <CustomDropdown
                 value={billingCycle}
-                onChange={(e) => setBillingCycle(e.target.value as BillingCycle)}
-                className="w-full bg-[#131d35] border border-[#1e293b] rounded-xl py-3 px-3.5 text-sm text-[#f1f5f9] focus:outline-none focus:border-[#3b82f6]"
-              >
-                <option value="monthly">Mensual</option>
-                <option value="yearly">Anual</option>
-                <option value="weekly">Semanal</option>
-              </select>
+                onChange={(val) => setBillingCycle(val as BillingCycle)}
+                options={[
+                  { value: 'monthly', label: 'Mensual' },
+                  { value: 'yearly', label: 'Anual' },
+                  { value: 'weekly', label: 'Semanal' }
+                ]}
+              />
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <label className="block text-xs font-medium text-[#94a3b8]">Próximo Pago</label>
-              <input
-                type="date"
-                required
+              <CustomDatePicker
                 value={nextPaymentDate}
-                onChange={(e) => setNextPaymentDate(e.target.value)}
-                className="w-full bg-[#131d35] border border-[#1e293b] rounded-xl py-3 px-3 text-xs sm:text-sm text-[#f1f5f9] focus:outline-none focus:border-[#3b82f6]"
+                onChange={setNextPaymentDate}
               />
             </div>
 
@@ -294,16 +294,16 @@ export const NewSubscriptionModal: React.FC<NewSubscriptionModalProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <label className="block text-xs font-medium text-[#94a3b8]">Recordatorio</label>
-              <select
-                value={reminderDays}
-                onChange={(e) => setReminderDays(Number(e.target.value))}
-                className="w-full bg-[#131d35] border border-[#1e293b] rounded-xl py-3 px-3.5 text-sm text-[#f1f5f9] focus:outline-none focus:border-[#3b82f6]"
-              >
-                <option value={1}>1 día antes</option>
-                <option value={2}>2 días antes</option>
-                <option value={3}>3 días antes</option>
-                <option value={7}>7 días antes</option>
-              </select>
+              <CustomDropdown
+                value={reminderDays.toString()}
+                onChange={(val) => setReminderDays(Number(val))}
+                options={[
+                  { value: '1', label: '1 día antes' },
+                  { value: '2', label: '2 días antes' },
+                  { value: '3', label: '3 días antes' },
+                  { value: '7', label: '7 días antes' }
+                ]}
+              />
             </div>
 
             <div className="space-y-1.5">

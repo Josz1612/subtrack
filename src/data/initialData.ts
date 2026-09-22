@@ -296,8 +296,8 @@ export const POPULAR_PRESETS = [
   {
     name: 'ChatGPT Plus',
     category: 'Productivity' as const,
-    amount: 20.0,
-    currency: 'USD' as const,
+    amount: 400.0,
+    currency: 'MXN' as const,
     billingCycle: 'monthly' as const,
     iconLetter: 'C',
     iconBgColor: '#10a37f',
@@ -307,8 +307,8 @@ export const POPULAR_PRESETS = [
   {
     name: 'YouTube Premium',
     category: 'Entertainment' as const,
-    amount: 13.99,
-    currency: 'USD' as const,
+    amount: 100,
+    currency: 'MXN' as const,
     billingCycle: 'monthly' as const,
     iconLetter: 'Y',
     iconBgColor: '#ff0000',
