@@ -405,6 +405,7 @@ export default function App() {
       <div className="flex-1 w-full max-w-[768px] lg:max-w-[1024px] mx-auto relative pb-24">
 
         <AnimatePresence mode="wait">
+          {/* @ts-expect-error Types in React Router don't expose key despite it being standard */}
           <Routes location={location} key={location.pathname}>
           <Route path="/" element={<Navigate to={isAuthenticated ? "/payments" : "/login"} replace />} />
 

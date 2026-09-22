@@ -230,8 +230,7 @@ export const POPULAR_PRESETS = [
   {
     name: 'Netflix',
     category: 'Entertainment' as const,
-    amount: 269,
-    currency: 'MXN' as const,
+    prices: { MXN: 269, USD: 15.49, EUR: 13.49, GBP: 10.99 },
     billingCycle: 'monthly' as const,
     iconLetter: 'N',
     iconBgColor: '#e50914',
@@ -241,8 +240,7 @@ export const POPULAR_PRESETS = [
   {
     name: 'Spotify',
     category: 'Entertainment' as const,
-    amount: 139,
-    currency: 'MXN' as const,
+    prices: { MXN: 139, USD: 11.99, EUR: 10.99, GBP: 11.99 },
     billingCycle: 'monthly' as const,
     iconLetter: 'S',
     iconBgColor: '#1DB954',
@@ -252,8 +250,7 @@ export const POPULAR_PRESETS = [
   {
     name: 'Prime Video',
     category: 'Entertainment' as const,
-    amount: 99,
-    currency: 'MXN' as const,
+    prices: { MXN: 99, USD: 8.99, EUR: 8.99, GBP: 5.99 },
     billingCycle: 'monthly' as const,
     iconLetter: 'P',
     iconBgColor: '#00A8E1',
@@ -263,8 +260,7 @@ export const POPULAR_PRESETS = [
   {
     name: 'Gym Club',
     category: 'Health' as const,
-    amount: 499,
-    currency: 'MXN' as const,
+    prices: { MXN: 499, USD: 29.99, EUR: 29.99, GBP: 25.00 },
     billingCycle: 'monthly' as const,
     iconLetter: 'G',
     iconBgColor: '#2b2826',
@@ -274,8 +270,7 @@ export const POPULAR_PRESETS = [
   {
     name: 'Adobe CC',
     category: 'Productivity' as const,
-    amount: 699,
-    currency: 'MXN' as const,
+    prices: { MXN: 699, USD: 54.99, EUR: 62.99, GBP: 49.99 },
     billingCycle: 'monthly' as const,
     iconLetter: 'A',
     iconBgColor: '#34302c',
@@ -285,8 +280,7 @@ export const POPULAR_PRESETS = [
   {
     name: 'iCloud+',
     category: 'Utilities' as const,
-    amount: 49,
-    currency: 'MXN' as const,
+    prices: { MXN: 49, USD: 0.99, EUR: 0.99, GBP: 0.99 },
     billingCycle: 'monthly' as const,
     iconLetter: 'i',
     iconBgColor: '#007AFF',
@@ -296,8 +290,7 @@ export const POPULAR_PRESETS = [
   {
     name: 'ChatGPT Plus',
     category: 'Productivity' as const,
-    amount: 400.0,
-    currency: 'MXN' as const,
+    prices: { MXN: 400, USD: 20.00, EUR: 22.00, GBP: 16.00 },
     billingCycle: 'monthly' as const,
     iconLetter: 'C',
     iconBgColor: '#10a37f',
@@ -307,8 +300,7 @@ export const POPULAR_PRESETS = [
   {
     name: 'YouTube Premium',
     category: 'Entertainment' as const,
-    amount: 100,
-    currency: 'MXN' as const,
+    prices: { MXN: 100, USD: 13.99, EUR: 11.99, GBP: 11.99 },
     billingCycle: 'monthly' as const,
     iconLetter: 'Y',
     iconBgColor: '#ff0000',

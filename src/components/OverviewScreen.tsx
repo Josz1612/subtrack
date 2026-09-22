@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Subscription, Currency, ScreenId } from '../types';
 import { formatCurrency } from '../data/initialData';
 import { convertAmount } from '../utils/currency';
+import { convertCurrency } from '../utils/currencyUtils';
 import {
   Plus,
   Search,
@@ -87,7 +88,7 @@ export const OverviewScreen: React.FC<OverviewScreenProps> = ({
 
   const activeSubs = subscriptions.filter((s) => s.status === 'active');
   const pausedSubs = subscriptions.filter((s) => s.status === 'paused');
-  const totalMonthlySpend = activeSubs.reduce((acc, curr) => acc + curr.amount, 0);
+  const totalMonthlySpend = activeSubs.reduce((acc, curr) => acc + convertCurrency(curr.amount, curr.currency, currency as string), 0);
   const budgetPercentage = Math.min(
     Math.round((totalMonthlySpend / realBudget) * 100),
     100

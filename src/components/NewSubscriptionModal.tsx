@@ -25,7 +25,9 @@ export const NewSubscriptionModal: React.FC<NewSubscriptionModalProps> = ({
   const [subCurrency, setSubCurrency] = useState<Currency>(currency);
   const [category, setCategory] = useState<Category>('Entertainment');
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
-  const [nextPaymentDate, setNextPaymentDate] = useState<string>('2026-11-20');
+  const [nextPaymentDate, setNextPaymentDate] = useState<string>(
+    new Date().toISOString().slice(0, 10)
+  );
   const [planName, setPlanName] = useState<string>('');
   const [reminderDays, setReminderDays] = useState<number>(3);
   const [cardLast4, setCardLast4] = useState<string>('4242');
@@ -44,16 +46,19 @@ export const NewSubscriptionModal: React.FC<NewSubscriptionModalProps> = ({
       setReminderDays(subscriptionToEdit.reminderDays || 3);
       setCardLast4(subscriptionToEdit.paymentMethod?.last4 || '4242');
       setCardType((subscriptionToEdit.paymentMethod?.type as any) || 'VISA');
+    } else {
+      setSubCurrency(currency);
     }
-  }, [subscriptionToEdit]);
+  }, [subscriptionToEdit, currency]);
 
   const handleSelectPreset = (preset: (typeof POPULAR_PRESETS)[0]) => {
     setName(preset.name);
-    setAmount(preset.amount.toString());
+    const priceAmount = (preset.prices as any)[currency] ?? (preset.prices as any)['USD'];
+    setAmount(priceAmount.toString());
     setCategory(preset.category);
     setBillingCycle(preset.billingCycle);
     setPlanName(preset.defaultPlan);
-    setSubCurrency(preset.currency);
+    setSubCurrency(currency);
   };
 
   const filteredPresets = POPULAR_PRESETS.filter((p) =>

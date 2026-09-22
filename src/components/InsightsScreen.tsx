@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Subscription, Currency, PaymentHistoryItem } from '../types';
 import { formatCurrency } from '../data/initialData';
+import { convertCurrency } from '../utils/currencyUtils';
 import { ArrowDown, Film, Briefcase, Zap, Heart, Code2, ChevronRight, Layers, Sparkles, ArrowLeft, Plus } from 'lucide-react';
 import { EmptyState } from './EmptyState';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
@@ -31,7 +32,7 @@ export const InsightsScreen: React.FC<InsightsScreenProps> = ({
   const [selectedCatDetail, setSelectedCatDetail] = useState<string | null>(null);
 
   const activeSubs = subscriptions.filter((s) => s.status === 'active');
-  const currentTotal = activeSubs.reduce((sum, s) => sum + s.amount, 0);
+  const currentTotal = activeSubs.reduce((sum, s) => sum + convertCurrency(s.amount, s.currency, currency as string), 0);
 
   // Monthly trends data - dynamic 6 months
   const now = new Date();
@@ -54,7 +55,7 @@ export const InsightsScreen: React.FC<InsightsScreenProps> = ({
         const [hYear, hMonth] = h.fullDate.split('-');
         return parseInt(hYear, 10) === year && parseInt(hMonth, 10) - 1 === month;
       });
-      amount = monthHistory.reduce((sum, h) => sum + h.amount, 0);
+      amount = monthHistory.reduce((sum, h) => sum + convertCurrency(h.amount, h.currency, currency as string), 0);
     }
     if (amount > maxAmount) maxAmount = amount;
 
@@ -78,12 +79,12 @@ export const InsightsScreen: React.FC<InsightsScreenProps> = ({
 
   const getCategoryTotal = (categoryName: string) => {
     if (isCurrentMonthSelected) {
-      return activeSubs.filter(s => s.category === categoryName).reduce((sum, s) => sum + s.amount, 0);
+      return activeSubs.filter(s => s.category === categoryName).reduce((sum, s) => sum + convertCurrency(s.amount, s.currency, currency as string), 0);
     } else {
       return historyList.filter(h => {
         const [hYear, hMonth] = h.fullDate.split('-');
         return h.category === categoryName && parseInt(hYear, 10) === targetYear && parseInt(hMonth, 10) - 1 === targetMonthIndex;
-      }).reduce((sum, h) => sum + h.amount, 0);
+      }).reduce((sum, h) => sum + convertCurrency(h.amount, h.currency, currency as string), 0);
     }
   };
 
