@@ -20,6 +20,7 @@ import {
 import { EmptyState } from './EmptyState';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Haptics, NotificationType } from '@capacitor/haptics';
+import { Preferences } from '@capacitor/preferences';
 
 interface OverviewScreenProps {
   isLoading?: boolean;
@@ -64,15 +65,31 @@ export const OverviewScreen: React.FC<OverviewScreenProps> = ({
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'paused'>('all');
   const [showBudgetModal, setShowBudgetModal] = useState<boolean>(false);
-  const [tempBudget, setTempBudget] = useState<string>(
-    convertAmount(monthlyBudgetGoal, 'MXN', currency as any).toString()
-  );
+  const [realBudget, setRealBudget] = useState<number>(3000);
+  const [tempBudget, setTempBudget] = useState<string>('');
+
+  React.useEffect(() => {
+    const fetchBudget = async () => {
+      const { value } = await Preferences.get({ key: 'user_budget' });
+      if (value) {
+        const parsed = parseFloat(value);
+        if (!isNaN(parsed) && parsed >= 50) {
+          setRealBudget(parsed);
+        }
+      }
+    };
+    fetchBudget();
+  }, [showBudgetModal]); // Recargar al abrir/cerrar modal por si se editó
+
+  React.useEffect(() => {
+    setTempBudget(convertAmount(realBudget, 'MXN', currency as any).toString());
+  }, [realBudget, currency]);
 
   const activeSubs = subscriptions.filter((s) => s.status === 'active');
   const pausedSubs = subscriptions.filter((s) => s.status === 'paused');
   const totalMonthlySpend = activeSubs.reduce((acc, curr) => acc + curr.amount, 0);
   const budgetPercentage = Math.min(
-    Math.round((totalMonthlySpend / (monthlyBudgetGoal || 150)) * 100),
+    Math.round((totalMonthlySpend / realBudget) * 100),
     100
   );
 
@@ -88,12 +105,16 @@ export const OverviewScreen: React.FC<OverviewScreenProps> = ({
     return matchesCategory && matchesSearch && matchesStatus;
   });
 
-  const handleSaveBudget = (e: React.FormEvent) => {
+  const handleSaveBudget = async (e: React.FormEvent) => {
     e.preventDefault();
     const parsed = parseFloat(tempBudget);
-    if (parsed > 0 && onUpdateBudget) {
+    if (parsed > 0) {
       const mxnBudget = convertAmount(parsed, currency as any, 'MXN');
-      onUpdateBudget(mxnBudget);
+      await Preferences.set({ key: 'user_budget', value: mxnBudget.toString() });
+      setRealBudget(mxnBudget);
+      if (onUpdateBudget) {
+        onUpdateBudget(mxnBudget);
+      }
     }
     setShowBudgetModal(false);
   };
@@ -148,7 +169,7 @@ export const OverviewScreen: React.FC<OverviewScreenProps> = ({
             <span className="font-medium flex items-center gap-1">
               Presupuesto: {formatCurrency(totalMonthlySpend, currency)} de{' '}
               <span className="text-white font-bold underline decoration-[#3b82f6]/50">
-                {formatCurrency(monthlyBudgetGoal, currency)}
+                {formatCurrency(realBudget, currency)}
               </span>
             </span>
             <span

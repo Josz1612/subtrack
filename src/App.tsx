@@ -23,6 +23,7 @@ import { SettingsScreen } from './components/SettingsScreen';
 import { CheckCircle2, AlertCircle, ArrowLeft } from 'lucide-react';
 import { Preferences } from '@capacitor/preferences';
 import { LocalNotifications } from '@capacitor/local-notifications';
+import { CapacitorCalendar } from '@capgo/capacitor-calendar';
 import { AnimatePresence } from 'framer-motion';
 
 export default function App() {
@@ -200,6 +201,22 @@ export default function App() {
     setSubscriptions((prev) => prev.filter((s) => s.id !== subId));
     showToast(`Suscripción "${target?.name || ''}" cancelada y eliminada`, 'info');
     handleNavigate('payments');
+
+    if (target) {
+      (async () => {
+        try {
+          const from = new Date(target.nextPaymentDate).getTime() - 86400000;
+          const to = new Date(target.nextPaymentDate).getTime() + 86400000 * 2;
+          const { result } = await CapacitorCalendar.listEventsInRange({ from, to });
+          const event = result.find((e: any) => e.title === 'Pago de ' + target.name);
+          if (event) {
+            await CapacitorCalendar.deleteEvent({ id: event.id });
+          }
+        } catch (e) {
+          console.log('Error deleting calendar event', e);
+        }
+      })();
+    }
   };
 
   const handleTogglePauseSubscription = (subId: string) => {
@@ -211,6 +228,23 @@ export default function App() {
             setSelectedSub({ ...s, status: newStatus });
           }
           showToast(`Suscripción ${newStatus === 'paused' ? 'pausada' : 'reactivada'}`);
+
+          (async () => {
+            try {
+              if (newStatus === 'paused') {
+                const from = new Date(s.nextPaymentDate).getTime() - 86400000;
+                const to = new Date(s.nextPaymentDate).getTime() + 86400000 * 2;
+                const { result } = await CapacitorCalendar.listEventsInRange({ from, to });
+                const event = result.find((e: any) => e.title === 'Pago de ' + s.name);
+                if (event) {
+                  await CapacitorCalendar.deleteEvent({ id: event.id });
+                }
+              }
+            } catch (e) {
+              console.log('Error pausing calendar event', e);
+            }
+          })();
+
           return { ...s, status: newStatus };
         }
         return s;
@@ -246,6 +280,32 @@ export default function App() {
     }
 
     showToast(`¡Pago de ${sub.name} registrado con éxito!`);
+
+    (async () => {
+      try {
+        const from = new Date(sub.nextPaymentDate).getTime() - 86400000;
+        const to = new Date(sub.nextPaymentDate).getTime() + 86400000 * 2;
+        const { result } = await CapacitorCalendar.listEventsInRange({ from, to });
+        const event = result.find((e: any) => e.title === 'Pago de ' + sub.name);
+        
+        if (event) {
+          await CapacitorCalendar.modifyEvent({ 
+            id: event.id,
+            title: 'Pagado: ' + sub.name
+          });
+        }
+
+        const newStartDate = new Date(nextDateStr).getTime();
+        const newEndDate = newStartDate + 3600000; // +1 hour
+        await CapacitorCalendar.createEvent({
+          title: 'Pago de ' + sub.name,
+          startDate: newStartDate,
+          endDate: newEndDate,
+        });
+      } catch (e) {
+        console.log('Error updating calendar for payment', e);
+      }
+    })();
   };
 
   const handleEditSubscription = (sub: Subscription) => {
@@ -441,6 +501,7 @@ export default function App() {
               <InsightsScreen
                 isLoading={isInitializing}
                 subscriptions={subscriptions}
+                history={history}
                 currency={user.preferredCurrency}
                 onSelectCategory={(cat) => {
                   showToast(`Filtrando categoría: ${cat}`, 'info');

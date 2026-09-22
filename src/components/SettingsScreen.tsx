@@ -60,6 +60,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   const importFileInputRef = useRef<HTMLInputElement>(null);
 
   const [budgetLimit, setBudgetLimit] = useState(3000);
+  const [isBudgetModalOpen, setIsBudgetModalOpen] = useState(false);
+  const [newBudgetValue, setNewBudgetValue] = useState('');
 
   useEffect(() => {
     const loadBudget = async () => {
@@ -274,20 +276,9 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           <div className="p-4 sm:p-5 flex items-center justify-between">
             <div 
               className="flex items-center gap-3.5 cursor-pointer active:scale-95 transition-all touch-manipulation"
-              onClick={async () => {
-                const input = window.prompt('Ingresa el nuevo presupuesto en MXN:', budgetLimit.toString());
-                if (input !== null && input.trim() !== '') {
-                  const newVal = parseFloat(input);
-                  if (!isNaN(newVal) && newVal > 0) {
-                    setBudgetLimit(newVal);
-                    await Preferences.set({ key: 'user_budget', value: newVal.toString() });
-                    // Si tienes el onUpdateUser también para otras cosas, puedes activarlo opcionalmente
-                    onUpdateUser({ monthlyBudgetGoal: newVal });
-                    if (onShowToast) onShowToast('Presupuesto actualizado correctamente', 'success');
-                  } else {
-                    if (onShowToast) onShowToast('Por favor ingresa un número válido mayor a 0', 'error');
-                  }
-                }
+              onClick={() => {
+                setNewBudgetValue(budgetLimit.toString());
+                setIsBudgetModalOpen(true);
               }}
             >
               <div className="w-10 h-10 rounded-xl bg-[#131d35] flex items-center justify-center text-[#38bdf8] border border-[#1e293b]">
@@ -679,6 +670,51 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             >
               Entendido
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Budget Edit Modal */}
+      {isBudgetModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-[#0f172a] rounded-2xl p-6 max-w-sm w-full shadow-subtrack-lg border border-[#1e293b] animate-in fade-in zoom-in-95 duration-150">
+            <h3 className="text-base font-bold text-[#f1f5f9] mb-3">Editar Presupuesto</h3>
+            <div className="mb-5 space-y-2">
+              <label className="text-xs text-[#94a3b8] font-medium">Presupuesto mensual</label>
+              <input
+                type="number"
+                value={newBudgetValue}
+                onChange={(e) => setNewBudgetValue(e.target.value)}
+                placeholder="Ingresa el límite"
+                className="w-full bg-[#131d35] border border-[#1e293b] rounded-xl py-2.5 px-3 text-xs sm:text-sm text-[#f1f5f9] placeholder-[#64748b] focus:outline-none focus:border-[#3b82f6]"
+                autoFocus
+              />
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setIsBudgetModalOpen(false)}
+                className="flex-1 py-2.5 rounded-xl border border-[#334155] text-xs font-semibold text-[#f1f5f9] hover:bg-[#1e293b] min-h-[44px]"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={async () => {
+                  const newVal = parseFloat(newBudgetValue);
+                  if (!isNaN(newVal) && newVal > 0) {
+                    setBudgetLimit(newVal);
+                    await Preferences.set({ key: 'user_budget', value: newVal.toString() });
+                    onUpdateUser({ monthlyBudgetGoal: newVal });
+                    if (onShowToast) onShowToast('Presupuesto actualizado correctamente', 'success');
+                    setIsBudgetModalOpen(false);
+                  } else {
+                    if (onShowToast) onShowToast('Por favor ingresa un número válido mayor a 0', 'error');
+                  }
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-[#3b82f6] hover:bg-[#2563eb] text-white text-xs font-bold shadow-blue-glow min-h-[44px]"
+              >
+                Guardar
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Subscription, Currency } from '../types';
+import { Subscription, Currency, PaymentHistoryItem } from '../types';
 import { formatCurrency } from '../data/initialData';
 import { ArrowDown, Film, Briefcase, Zap, Heart, Code2, ChevronRight, Layers, Sparkles, ArrowLeft, Plus } from 'lucide-react';
 import { EmptyState } from './EmptyState';
@@ -9,6 +9,7 @@ import { motion } from 'framer-motion';
 interface InsightsScreenProps {
   isLoading?: boolean;
   subscriptions: Subscription[];
+  history?: PaymentHistoryItem[];
   currency: Currency;
   onSelectCategory?: (category: string) => void;
   onShowToast?: (text: string, type?: 'success' | 'info' | 'error') => void;
@@ -19,6 +20,7 @@ interface InsightsScreenProps {
 export const InsightsScreen: React.FC<InsightsScreenProps> = ({
   isLoading,
   subscriptions,
+  history,
   currency,
   onSelectCategory,
   onShowToast,
@@ -31,39 +33,67 @@ export const InsightsScreen: React.FC<InsightsScreenProps> = ({
   const activeSubs = subscriptions.filter((s) => s.status === 'active');
   const currentTotal = activeSubs.reduce((sum, s) => sum + s.amount, 0);
 
-  // Monthly trends data
-  const trends = [
-    { month: 'Oct', amount: 130.0, height: '60%' },
-    { month: 'Nov', amount: 138.5, height: '75%' },
-    { month: 'Dic', amount: 155.0, height: '90%' },
-    { month: 'Ene', amount: 148.0, height: '85%' },
-    { month: 'Feb', amount: 139.0, height: '70%' },
-    { month: 'Mar', amount: currentTotal, height: '65%' },
-  ];
+  // Monthly trends data - dynamic 6 months
+  const now = new Date();
+  const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+  const historyList = history || [];
+  
+  const trends: { month: string; year: number; amount: number; height: string }[] = [];
+  let maxAmount = 0;
 
-  // Dynamic category calculations
-  const entertainmentTotal = subscriptions
-    .filter((s) => s.status === 'active' && s.category === 'Entertainment')
-    .reduce((sum, s) => sum + s.amount, 0);
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const month = d.getMonth();
+    const year = d.getFullYear();
 
-  const productivityTotal = subscriptions
-    .filter((s) => s.status === 'active' && s.category === 'Productivity')
-    .reduce((sum, s) => sum + s.amount, 0);
+    let amount = 0;
+    if (i === 0) {
+      amount = currentTotal; // active subs
+    } else {
+      const monthHistory = historyList.filter(h => {
+        const [hYear, hMonth] = h.fullDate.split('-');
+        return parseInt(hYear, 10) === year && parseInt(hMonth, 10) - 1 === month;
+      });
+      amount = monthHistory.reduce((sum, h) => sum + h.amount, 0);
+    }
+    if (amount > maxAmount) maxAmount = amount;
 
-  const utilitiesTotal = subscriptions
-    .filter((s) => s.status === 'active' && s.category === 'Utilities')
-    .reduce((sum, s) => sum + s.amount, 0);
+    trends.push({
+      month: monthNames[month],
+      year,
+      amount,
+      height: '0%'
+    });
+  }
 
-  const healthTotal = subscriptions
-    .filter((s) => s.status === 'active' && s.category === 'Health')
-    .reduce((sum, s) => sum + s.amount, 0);
+  trends.forEach(t => {
+    t.height = maxAmount > 0 ? `${Math.max(10, Math.round((t.amount / maxAmount) * 100))}%` : '10%';
+  });
 
-  const devTotal = subscriptions
-    .filter((s) => s.status === 'active' && s.category === 'Developer')
-    .reduce((sum, s) => sum + s.amount, 0);
+  const selectedMonthData = trends[activeMonthIdx];
+  const isCurrentMonthSelected = activeMonthIdx === 5;
+  const targetYear = selectedMonthData?.year || now.getFullYear();
+  const targetMonthName = selectedMonthData?.month || '';
+  const targetMonthIndex = monthNames.indexOf(targetMonthName);
 
-  const total =
-    entertainmentTotal + productivityTotal + utilitiesTotal + healthTotal + devTotal;
+  const getCategoryTotal = (categoryName: string) => {
+    if (isCurrentMonthSelected) {
+      return activeSubs.filter(s => s.category === categoryName).reduce((sum, s) => sum + s.amount, 0);
+    } else {
+      return historyList.filter(h => {
+        const [hYear, hMonth] = h.fullDate.split('-');
+        return h.category === categoryName && parseInt(hYear, 10) === targetYear && parseInt(hMonth, 10) - 1 === targetMonthIndex;
+      }).reduce((sum, h) => sum + h.amount, 0);
+    }
+  };
+
+  const entertainmentTotal = getCategoryTotal('Entertainment');
+  const productivityTotal = getCategoryTotal('Productivity');
+  const utilitiesTotal = getCategoryTotal('Utilities');
+  const healthTotal = getCategoryTotal('Health');
+  const devTotal = getCategoryTotal('Developer');
+
+  const total = entertainmentTotal + productivityTotal + utilitiesTotal + healthTotal + devTotal;
 
   const entPercentNum = total > 0 ? Math.round((entertainmentTotal / total) * 100) : 0;
   const prodPercentNum = total > 0 ? Math.round((productivityTotal / total) * 100) : 0;
