@@ -319,7 +319,7 @@ export const PaymentsScreen: React.FC<PaymentsScreenProps> = ({
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, x: -50, transition: { duration: 0.2 } }}
-                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#0f172a] p-4 sm:p-5 rounded-2xl shadow-subtrack border border-[#1e293b] hover:border-[#3b82f6]/50 transition-all duration-200 relative z-10"
+                    className="flex justify-between items-center gap-2 bg-[#0f172a] p-4 sm:p-5 rounded-2xl shadow-subtrack border border-[#1e293b] hover:border-[#3b82f6]/50 transition-all duration-200 relative z-10"
                   >
                     <div
                       onClick={() => onSelectSubscription(sub)}
@@ -347,12 +347,12 @@ export const PaymentsScreen: React.FC<PaymentsScreenProps> = ({
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-[#1e293b]">
-                      <div className="text-left sm:text-right">
-                        <span className="text-lg font-bold text-[#f1f5f9]">
+                    <div className="flex items-center gap-2 shrink-0">
+                      <div className="text-right shrink-0">
+                        <span className="text-sm sm:text-lg font-bold text-[#f1f5f9]">
                           {formatCurrency(sub.amount, currency)}
                         </span>
-                        <p className="text-[11px] text-[#64748b]">
+                        <p className="text-[10px] sm:text-[11px] text-[#64748b]">
                           {sub.billingCycle === 'monthly' ? 'Mensual' : 'Anual'}
                         </p>
                       </div>

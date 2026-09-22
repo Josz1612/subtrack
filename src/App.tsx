@@ -200,7 +200,7 @@ export default function App() {
     const target = subscriptions.find((s) => s.id === subId);
     setSubscriptions((prev) => prev.filter((s) => s.id !== subId));
     showToast(`Suscripción "${target?.name || ''}" cancelada y eliminada`, 'info');
-    handleNavigate('payments');
+    handleNavigate('overview');
 
     if (target) {
       (async () => {
