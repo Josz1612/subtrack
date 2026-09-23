@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Subscription, Currency, ScreenId } from '../types';
 import { formatCurrency } from '../data/initialData';
-import { convertAmount } from '../utils/currency';
+// Removed unused import
 import { convertCurrency } from '../utils/currencyUtils';
 import {
   Plus,
@@ -83,7 +83,7 @@ export const OverviewScreen: React.FC<OverviewScreenProps> = ({
   }, [showBudgetModal]); // Recargar al abrir/cerrar modal por si se editó
 
   React.useEffect(() => {
-    setTempBudget(convertAmount(realBudget, 'MXN', currency as any).toString());
+    setTempBudget(realBudget.toString());
   }, [realBudget, currency]);
 
   const activeSubs = subscriptions.filter((s) => s.status === 'active');
@@ -110,11 +110,11 @@ export const OverviewScreen: React.FC<OverviewScreenProps> = ({
     e.preventDefault();
     const parsed = parseFloat(tempBudget);
     if (parsed > 0) {
-      const mxnBudget = convertAmount(parsed, currency as any, 'MXN');
-      await Preferences.set({ key: 'user_budget', value: mxnBudget.toString() });
-      setRealBudget(mxnBudget);
+      const budgetVal = parsed;
+      await Preferences.set({ key: 'user_budget', value: budgetVal.toString() });
+      setRealBudget(budgetVal);
       if (onUpdateBudget) {
-        onUpdateBudget(mxnBudget);
+        onUpdateBudget(budgetVal);
       }
     }
     setShowBudgetModal(false);

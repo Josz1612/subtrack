@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { UserProfile, Subscription, Currency } from '../types';
 import { formatCurrency } from '../data/initialData';
 import { SubTrackLogo } from './SubTrackLogo';
-import { convertAmount } from '../utils/currency';
+import { convertCurrency } from '../utils/currencyUtils';
 import {
   CreditCard,
   Target,
@@ -599,11 +599,16 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               {(['USD', 'EUR', 'MXN', 'GBP'] as Currency[]).map((curr) => (
                 <button
                   key={curr}
-                  onClick={() => {
-                    const newBudget = convertAmount(3000.0, 'MXN', curr);
+                  onClick={async () => {
+                    const convertedBudget = convertCurrency(budgetLimit, user.preferredCurrency, curr);
+                    const roundedBudget = Math.round(convertedBudget * 100) / 100;
+                    
+                    setBudgetLimit(roundedBudget);
+                    await Preferences.set({ key: 'user_budget', value: roundedBudget.toString() });
+                    
                     onUpdateUser({ 
                       preferredCurrency: curr,
-                      monthlyBudgetGoal: newBudget
+                      monthlyBudgetGoal: roundedBudget
                     });
                     setShowCurrencyModal(false);
                   }}
