@@ -20,6 +20,7 @@ import {
   Smartphone,
   ArrowLeft,
   Camera,
+  X,
 } from 'lucide-react';
 import { Preferences } from '@capacitor/preferences';
 import { NativeBiometric } from '@capgo/capacitor-native-biometric';
@@ -52,6 +53,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   const [showEditProfileModal, setShowEditProfileModal] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showInfoModal, setShowInfoModal] = useState<string | null>(null);
+  const [showClearModal, setShowClearModal] = useState(false);
 
   const [editName, setEditName] = useState(user.name);
   const [editEmail, setEditEmail] = useState(user.email);
@@ -179,10 +181,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
     e.target.value = '';
   };
 
-  const handleCleanCalendar = async () => {
-    const confirmed = window.confirm('¿Estás seguro? Esto borrará todos los recordatorios futuros de SubTrack de tu calendario.');
-    if (!confirmed) return;
-
+  const executeCleanCalendar = async () => {
+    setShowClearModal(false);
     try {
       const result = await CapacitorCalendar.requestFullCalendarAccess();
       if (result.result === 'granted') {
@@ -488,7 +488,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             <ChevronRight className="w-5 h-5 text-[#64748b]" />
           </button>
           <button
-            onClick={handleCleanCalendar}
+            onClick={() => setShowClearModal(true)}
             className="w-full p-4 sm:p-5 flex items-center justify-between hover:bg-red-900/20 transition-colors text-left touch-manipulation min-h-[52px]"
           >
             <div className="flex items-center gap-3.5">
@@ -768,7 +768,52 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           </div>
         </div>
       )}
+
+      {/* Clear Calendar Confirmation Modal */}
+      {showClearModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="bg-gray-900 rounded-2xl w-full max-w-sm p-6 border border-[#1e293b] shadow-2xl relative"
+          >
+            <button
+              onClick={() => setShowClearModal(false)}
+              className="absolute top-4 right-4 text-[#64748b] hover:text-[#f1f5f9] transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            
+            <div className="flex flex-col items-center text-center mt-2">
+              <div className="w-12 h-12 rounded-full bg-red-900/30 flex items-center justify-center mb-4 border border-red-500/30">
+                <Shield className="w-6 h-6 text-red-500" />
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">
+                ¿Desvincular Calendario?
+              </h3>
+              <p className="text-sm text-gray-300 mb-6">
+                ¿Estás seguro? Esto borrará todos los recordatorios futuros de SubTrack de tu calendario nativo.
+              </p>
+              
+              <div className="flex gap-3 w-full">
+                <button
+                  onClick={() => setShowClearModal(false)}
+                  className="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-xl transition-colors text-sm"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={executeCleanCalendar}
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-xl shadow-red-glow transition-colors text-sm"
+                >
+                  Desvincular
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </motion.main>
   );
 };
-

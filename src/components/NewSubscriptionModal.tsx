@@ -31,6 +31,7 @@ export const NewSubscriptionModal: React.FC<NewSubscriptionModalProps> = ({
   const [cardLast4, setCardLast4] = useState<string>('4242');
   const [cardType, setCardType] = useState<'VISA' | 'MASTERCARD' | 'APPLE_PAY'>('VISA');
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeTemplate, setActiveTemplate] = useState<typeof POPULAR_PRESETS[0] | null>(null);
 
   useEffect(() => {
     if (subscriptionToEdit) {
@@ -57,7 +58,15 @@ export const NewSubscriptionModal: React.FC<NewSubscriptionModalProps> = ({
     setBillingCycle(preset.billingCycle);
     setPlanName(preset.defaultPlan);
     setSubCurrency(currency);
+    setActiveTemplate(preset);
   };
+
+  useEffect(() => {
+    if (activeTemplate) {
+      const priceAmount = (activeTemplate.prices as any)[subCurrency] ?? (activeTemplate.prices as any)['USD'];
+      setAmount(priceAmount.toString());
+    }
+  }, [subCurrency, activeTemplate]);
 
   const filteredPresets = POPULAR_PRESETS.filter((p) =>
     p.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -204,7 +213,10 @@ export const NewSubscriptionModal: React.FC<NewSubscriptionModalProps> = ({
               type="text"
               required
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                setName(e.target.value);
+                setActiveTemplate(null);
+              }}
               placeholder="Ej. Netflix, Spotify, Canva"
               className="w-full bg-[#131d35] border border-[#1e293b] rounded-xl py-3 px-3.5 text-sm text-[#f1f5f9] placeholder-[#64748b] focus:outline-none focus:border-[#3b82f6]"
             />
@@ -219,7 +231,10 @@ export const NewSubscriptionModal: React.FC<NewSubscriptionModalProps> = ({
                 min="0"
                 required
                 value={amount}
-                onChange={(e) => setAmount(e.target.value)}
+                onChange={(e) => {
+                  setAmount(e.target.value);
+                  setActiveTemplate(null);
+                }}
                 placeholder="0.00"
                 className="w-full bg-[#131d35] border border-[#1e293b] rounded-xl py-3 px-3.5 text-sm font-bold text-right text-[#f1f5f9] focus:outline-none focus:border-[#3b82f6]"
               />

@@ -135,13 +135,14 @@ export const PaymentsScreen: React.FC<PaymentsScreenProps> = ({
       if (result.result === 'granted') {
         const activeSubs = subscriptions.filter(s => s.status === 'active');
         for (const sub of activeSubs) {
-          const startDate = new Date(sub.nextPaymentDate).getTime();
+          const startDate = new Date(sub.nextPaymentDate + 'T12:00:00').getTime();
           const endDate = startDate + 3600000; // + 1 hour
 
           await CapacitorCalendar.createEvent({
             title: 'Pago de ' + sub.name,
             startDate: startDate,
             endDate: endDate,
+            alerts: sub.reminderDays ? [sub.reminderDays * 24 * 60] : [],
           });
         }
         

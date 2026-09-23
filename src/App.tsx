@@ -296,12 +296,13 @@ export default function App() {
           });
         }
 
-        const newStartDate = new Date(nextDateStr).getTime();
+        const newStartDate = new Date(nextDateStr + 'T12:00:00').getTime();
         const newEndDate = newStartDate + 3600000; // +1 hour
         await CapacitorCalendar.createEvent({
           title: 'Pago de ' + sub.name,
           startDate: newStartDate,
           endDate: newEndDate,
+          alerts: sub.reminderDays ? [sub.reminderDays * 24 * 60] : [],
         });
       } catch (e) {
         console.log('Error updating calendar for payment', e);
