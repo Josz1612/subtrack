@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Subscription, Currency, PaymentHistoryItem } from '../types';
+import { useAIPredictor } from '../hooks/useAIPredictor';
 import { formatCurrency } from '../data/initialData';
 import { convertCurrency } from '../utils/currencyUtils';
 import { ArrowDown, Film, Briefcase, Zap, Heart, Code2, ChevronRight, Layers, Sparkles, ArrowLeft, Plus } from 'lucide-react';
@@ -30,6 +31,8 @@ export const InsightsScreen: React.FC<InsightsScreenProps> = ({
 }) => {
   const [activeMonthIdx, setActiveMonthIdx] = useState<number>(5); // March / Current
   const [selectedCatDetail, setSelectedCatDetail] = useState<string | null>(null);
+
+  const aiPrediction = useAIPredictor(subscriptions, history || [], currency);
 
   const activeSubs = subscriptions.filter((s) => s.status === 'active');
   const currentTotal = activeSubs.reduce((sum, s) => sum + convertCurrency(s.amount, s.currency, currency as string), 0);
@@ -198,6 +201,24 @@ export const InsightsScreen: React.FC<InsightsScreenProps> = ({
         {/* Subtle decorative blue glow */}
         <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-[#3b82f6]/15 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700 pointer-events-none" />
       </section>
+
+      {/* Predicción de IA */}
+      {aiPrediction.isReady && (
+        <section className="bg-gradient-to-r from-[#0f172a] to-[#1e1b4b] rounded-[24px] p-6 sm:p-7 border border-[#6366f1]/30 shadow-[0_0_15px_rgba(99,102,241,0.1)] relative overflow-hidden group mb-2">
+          <div className="relative z-10">
+            <div className="flex items-center gap-2 mb-3">
+              <Sparkles className="w-5 h-5 text-[#a78bfa]" />
+              <h2 className="text-sm font-bold uppercase tracking-wider text-[#a78bfa]">
+                Analista de IA Local
+              </h2>
+            </div>
+            <p className="text-[#e2e8f0] text-sm leading-relaxed">
+              {aiPrediction.text}
+            </p>
+          </div>
+          <div className="absolute -top-10 -right-10 w-48 h-48 bg-[#8b5cf6]/10 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700 pointer-events-none" />
+        </section>
+      )}
 
       {/* Spending Trends (Bar Chart) */}
       <section className="mb-8">

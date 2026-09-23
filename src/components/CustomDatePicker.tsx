@@ -59,7 +59,8 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({ value, onCha
   };
 
   // Format display value
-  let displayValue = 'Seleccionar fecha';
+  let displayValue = 'DD/MM/AAAA';
+  let isPlaceholder = true;
   if (value) {
     const parts = value.split('-');
     if (parts.length === 3) {
@@ -68,6 +69,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({ value, onCha
       const y = parts[0];
       if (!isNaN(d) && !isNaN(m)) {
         displayValue = `${d} de ${monthNames[m]} ${y}`;
+        isPlaceholder = false;
       }
     }
   }
@@ -76,10 +78,10 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({ value, onCha
     <div className="relative w-full" ref={containerRef}>
       <div 
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full bg-[#131d35] border rounded-xl py-3 px-3.5 text-sm text-[#f1f5f9] flex items-center justify-between cursor-pointer transition-colors ${isOpen ? 'border-[#3b82f6]' : 'border-[#1e293b] hover:border-[#334155]'} ${className}`}
+        className={`w-full bg-[#131d35] border rounded-xl py-3 px-3.5 text-sm flex items-center justify-between cursor-pointer transition-colors ${isOpen ? 'border-[#3b82f6]' : 'border-[#1e293b] hover:border-[#334155]'} ${isPlaceholder ? 'text-gray-400' : 'text-[#f1f5f9]'} ${className}`}
       >
         <div className="flex items-center gap-2">
-          <CalendarIcon className="w-4 h-4 text-[#64748b]" />
+          <CalendarIcon className={`w-4 h-4 ${isPlaceholder ? 'text-gray-500' : 'text-[#64748b]'}`} />
           <span>{displayValue}</span>
         </div>
       </div>

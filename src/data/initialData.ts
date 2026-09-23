@@ -230,7 +230,7 @@ export const POPULAR_PRESETS = [
   {
     name: 'Netflix',
     category: 'Entertainment' as const,
-    prices: { MXN: 269, USD: 15.49, EUR: 13.49, GBP: 10.99 },
+    prices: { MXN: 219, USD: 15.49, EUR: 13.49, GBP: 10.99 },
     billingCycle: 'monthly' as const,
     iconLetter: 'N',
     iconBgColor: '#e50914',
@@ -240,7 +240,7 @@ export const POPULAR_PRESETS = [
   {
     name: 'Spotify',
     category: 'Entertainment' as const,
-    prices: { MXN: 139, USD: 11.99, EUR: 10.99, GBP: 11.99 },
+    prices: { MXN: 129, USD: 11.99, EUR: 10.99, GBP: 11.99 },
     billingCycle: 'monthly' as const,
     iconLetter: 'S',
     iconBgColor: '#1DB954',
@@ -270,7 +270,7 @@ export const POPULAR_PRESETS = [
   {
     name: 'Adobe CC',
     category: 'Productivity' as const,
-    prices: { MXN: 699, USD: 54.99, EUR: 62.99, GBP: 49.99 },
+    prices: { MXN: 699, USD: 59.99, EUR: 62.99, GBP: 56.98 },
     billingCycle: 'monthly' as const,
     iconLetter: 'A',
     iconBgColor: '#34302c',
@@ -280,7 +280,7 @@ export const POPULAR_PRESETS = [
   {
     name: 'iCloud+',
     category: 'Utilities' as const,
-    prices: { MXN: 49, USD: 0.99, EUR: 0.99, GBP: 0.99 },
+    prices: { MXN: 17, USD: 0.99, EUR: 0.99, GBP: 0.99 },
     billingCycle: 'monthly' as const,
     iconLetter: 'i',
     iconBgColor: '#007AFF',
@@ -290,7 +290,7 @@ export const POPULAR_PRESETS = [
   {
     name: 'ChatGPT Plus',
     category: 'Productivity' as const,
-    prices: { MXN: 400, USD: 20.00, EUR: 22.00, GBP: 16.00 },
+    prices: { MXN: 400, USD: 20.00, EUR: 22.00, GBP: 20.00 },
     billingCycle: 'monthly' as const,
     iconLetter: 'C',
     iconBgColor: '#10a37f',
@@ -300,7 +300,7 @@ export const POPULAR_PRESETS = [
   {
     name: 'YouTube Premium',
     category: 'Entertainment' as const,
-    prices: { MXN: 100, USD: 13.99, EUR: 11.99, GBP: 11.99 },
+    prices: { MXN: 139, USD: 13.99, EUR: 12.99, GBP: 12.99 },
     billingCycle: 'monthly' as const,
     iconLetter: 'Y',
     iconBgColor: '#ff0000',

@@ -25,9 +25,7 @@ export const NewSubscriptionModal: React.FC<NewSubscriptionModalProps> = ({
   const [subCurrency, setSubCurrency] = useState<Currency>(currency);
   const [category, setCategory] = useState<Category>('Entertainment');
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
-  const [nextPaymentDate, setNextPaymentDate] = useState<string>(
-    new Date().toISOString().slice(0, 10)
-  );
+  const [nextPaymentDate, setNextPaymentDate] = useState<string>('');
   const [planName, setPlanName] = useState<string>('');
   const [reminderDays, setReminderDays] = useState<number>(3);
   const [cardLast4, setCardLast4] = useState<string>('4242');
