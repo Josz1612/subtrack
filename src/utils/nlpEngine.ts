@@ -63,6 +63,37 @@ export const processNLPChat = (text: string, globalCurrency: Currency): NLPResul
   const dd = String(nextPayment.getDate()).padStart(2, '0');
   const formattedNextPaymentDate = `${yyyy}-${mm}-${dd}`;
 
+  let iconBg = '#34302c';
+  let iconLtr = name.charAt(0).toUpperCase();
+  let logoType: Subscription['logoType'] = 'custom';
+
+  const lowerName = name.toLowerCase();
+  if (lowerName.includes('netflix')) {
+    iconBg = '#000000';
+    iconLtr = 'N';
+    logoType = 'netflix';
+  } else if (lowerName.includes('spotify')) {
+    iconBg = '#1DB954';
+    iconLtr = 'S';
+    logoType = 'spotify';
+  } else if (lowerName.includes('icloud')) {
+    iconBg = '#007AFF';
+    iconLtr = 'i';
+    logoType = 'icloud';
+  } else if (lowerName.includes('adobe')) {
+    iconBg = '#2b2624';
+    iconLtr = 'A';
+    logoType = 'adobe';
+  } else if (lowerName.includes('gym')) {
+    iconBg = '#34302c';
+    iconLtr = 'G';
+    logoType = 'gym';
+  } else if (lowerName.includes('amazon') || lowerName.includes('prime')) {
+    iconBg = '#00A8E1';
+    iconLtr = 'a';
+    logoType = 'amazon';
+  }
+
   const newSubscription: Omit<Subscription, 'id'> = {
     name,
     amount,
@@ -71,9 +102,10 @@ export const processNLPChat = (text: string, globalCurrency: Currency): NLPResul
     billingCycle: 'monthly',
     nextPaymentDate: formattedNextPaymentDate,
     status: 'active',
-    iconLetter: name.charAt(0).toUpperCase(),
-    iconBgColor: '#3b82f6',
-    reminderDays: 3,
+    logoType,
+    iconLetter: iconLtr,
+    iconBgColor: iconBg,
+    reminderDays: 1,
     paymentMethod: {
       type: 'VISA',
       last4: '****'

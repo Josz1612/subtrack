@@ -3,6 +3,7 @@ import { Bot, X, Send } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Subscription, Currency } from '../types';
 import { processNLPChat } from '../utils/nlpEngine';
+import { CapacitorCalendar } from '@capgo/capacitor-calendar';
 
 interface Message {
   id: string;
@@ -49,6 +50,25 @@ export const AIChatAssistant: React.FC<AIChatAssistantProps> = ({ globalCurrency
       
       if (result.success && result.subscriptionData) {
         onSaveSubscription(result.subscriptionData);
+        
+        // Sync with calendar
+        (async () => {
+          try {
+            const nextDateStr = result.subscriptionData!.nextPaymentDate;
+            const newStartDate = new Date(nextDateStr + 'T12:00:00').getTime();
+            const newEndDate = newStartDate + 3600000;
+            const reminderMins = result.subscriptionData!.reminderDays ? result.subscriptionData!.reminderDays * 24 * 60 : 0;
+            
+            await CapacitorCalendar.createEvent({
+              title: 'Pago de ' + result.subscriptionData!.name,
+              startDate: newStartDate,
+              endDate: newEndDate,
+              alerts: reminderMins ? [reminderMins] : [],
+            });
+          } catch (e) {
+            console.log('Error creating calendar event from AI', e);
+          }
+        })();
       }
     }, 600);
 
