@@ -5,9 +5,9 @@ export const EXCHANGE_RATES: Record<string, number> = {
   GBP: 0.78
 };
 
-export function convertCurrency(amount: number, fromCurrency: string, toCurrency: string): number {
+export const convertCurrency = (amount: number, fromCurrency: string, toCurrency: string): number => {
   if (fromCurrency === toCurrency) return amount;
-  const fromRate = EXCHANGE_RATES[fromCurrency] || 1.0;
-  const toRate = EXCHANGE_RATES[toCurrency] || 1.0;
-  return (amount / fromRate) * toRate;
-}
+  // Convertir primero a USD (moneda pivote) y luego a la moneda destino
+  const amountInUSD = amount / EXCHANGE_RATES[fromCurrency];
+  return amountInUSD * EXCHANGE_RATES[toCurrency];
+};

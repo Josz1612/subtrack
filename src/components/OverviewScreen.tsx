@@ -393,7 +393,7 @@ export const OverviewScreen: React.FC<OverviewScreenProps> = ({
                 <div className="flex items-center gap-3 shrink-0">
                   <div className="text-right">
                     <span className="text-sm sm:text-base font-bold text-[#f1f5f9]">
-                      {formatCurrency(sub.amount, currency)}
+                      {formatCurrency(convertCurrency(sub.amount, sub.currency, currency as string), currency)}
                     </span>
                     <p className="text-[11px] text-[#64748b]">
                       {sub.nextPaymentDate.replace('2026-', '').replace('-', '/')}

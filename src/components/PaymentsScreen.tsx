@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Subscription, PaymentHistoryItem, Currency } from '../types';
 import { formatCurrency } from '../data/initialData';
+import { convertCurrency } from '../utils/currencyUtils';
 import {
   ChevronLeft,
   ChevronRight,
@@ -351,7 +352,7 @@ export const PaymentsScreen: React.FC<PaymentsScreenProps> = ({
                     <div className="flex items-center gap-2 shrink-0">
                       <div className="text-right shrink-0">
                         <span className="text-sm sm:text-lg font-bold text-[#f1f5f9]">
-                          {formatCurrency(sub.amount, currency)}
+                          {formatCurrency(convertCurrency(sub.amount, sub.currency, currency as string), currency)}
                         </span>
                         <p className="text-[10px] sm:text-[11px] text-[#64748b]">
                           {sub.billingCycle === 'monthly' ? 'Mensual' : 'Anual'}
@@ -463,7 +464,7 @@ export const PaymentsScreen: React.FC<PaymentsScreenProps> = ({
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <span className="text-sm font-bold text-[#f1f5f9]">
-                    -{formatCurrency(item.amount, currency)}
+                    -{formatCurrency(convertCurrency(item.amount, item.currency, currency as string), currency)}
                   </span>
                   <span className="px-2.5 py-0.5 rounded-full bg-[#14291e] text-[#4ade80] text-[11px] font-bold border border-[#4ade80]/30 flex items-center gap-1">
                     <Receipt className="w-3 h-3" />
@@ -502,7 +503,7 @@ export const PaymentsScreen: React.FC<PaymentsScreenProps> = ({
               <div className="flex justify-between py-1 border-b border-[#1e293b]">
                 <span className="text-[#64748b]">Monto Pagado</span>
                 <span className="font-bold text-[#4ade80] text-sm">
-                  {formatCurrency(selectedReceipt.amount, currency)}
+                  {formatCurrency(convertCurrency(selectedReceipt.amount, selectedReceipt.currency, currency as string), currency)}
                 </span>
               </div>
 
