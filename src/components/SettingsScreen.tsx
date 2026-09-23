@@ -26,6 +26,7 @@ import { NativeBiometric } from '@capgo/capacitor-native-biometric';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
+import { CapacitorCalendar } from '@capgo/capacitor-calendar';
 import { motion } from 'framer-motion';
 
 interface SettingsScreenProps {
@@ -176,6 +177,38 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
     reader.readAsText(file);
     // Resetear el input para permitir volver a subir el mismo archivo
     e.target.value = '';
+  };
+
+  const handleCleanCalendar = async () => {
+    const confirmed = window.confirm('¿Estás seguro? Esto borrará todos los recordatorios futuros de SubTrack de tu calendario.');
+    if (!confirmed) return;
+
+    try {
+      const result = await CapacitorCalendar.requestFullCalendarAccess();
+      if (result.result === 'granted') {
+        const now = new Date();
+        const future = new Date();
+        future.setFullYear(now.getFullYear() + 2);
+        
+        const { result: events } = await CapacitorCalendar.listEventsInRange({
+          from: now.getTime(),
+          to: future.getTime()
+        });
+
+        const appEvents = events.filter(e => e.title && (e.title.startsWith('Pago de ') || e.title.startsWith('Pagar: ')));
+        
+        for (const ev of appEvents) {
+          await CapacitorCalendar.deleteEvent({ id: ev.id });
+        }
+        
+        if (onShowToast) onShowToast('Calendario limpio. Ya puedes desinstalar la app de forma segura.', 'success');
+      } else {
+        if (onShowToast) onShowToast('Permiso denegado para limpiar el calendario', 'error');
+      }
+    } catch (e) {
+      console.error('Error limpiando calendario:', e);
+      if (onShowToast) onShowToast('Error al limpiar el calendario', 'error');
+    }
   };
 
   return (
@@ -453,6 +486,23 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               </div>
             </div>
             <ChevronRight className="w-5 h-5 text-[#64748b]" />
+          </button>
+          <button
+            onClick={handleCleanCalendar}
+            className="w-full p-4 sm:p-5 flex items-center justify-between hover:bg-red-900/20 transition-colors text-left touch-manipulation min-h-[52px]"
+          >
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-red-900/20 flex items-center justify-center text-red-500 border border-red-900/50">
+                <Shield className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-xs sm:text-sm font-semibold text-red-500">
+                  Desvincular y Limpiar Calendario
+                </p>
+                <p className="text-[11px] text-red-400/70">Elimina todos los eventos creados</p>
+              </div>
+            </div>
+            <ChevronRight className="w-5 h-5 text-red-500/50" />
           </button>
           
           <input
