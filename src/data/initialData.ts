@@ -318,15 +318,5 @@ export function formatCurrency(amount: number, targetCurrency: string = 'MXN'): 
   };
   const symbol = symbolMap[targetCurrency] || '$';
 
-  // Base price in DB is assumed MXN
-  let convertedAmount = amount;
-  if (targetCurrency === 'USD') {
-    convertedAmount = amount / 18.5;
-  } else if (targetCurrency === 'EUR') {
-    convertedAmount = amount / 20.5;
-  } else if (targetCurrency === 'GBP') {
-    convertedAmount = amount / 24.0;
-  }
-
-  return `${symbol}${convertedAmount.toFixed(2)}`;
+  return `${symbol}${amount.toFixed(2)}`;
 }
