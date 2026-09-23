@@ -55,12 +55,39 @@ export const processNLPChat = (text: string, globalCurrency: Currency): NLPResul
   // Limpiar nombre extraído de conectores
   name = name.replace(/^(el|la|los|las|un|una)\s+/i, '');
 
-  const nextPayment = new Date();
-  nextPayment.setMonth(nextPayment.getMonth() + 1);
-  // Formatear a YYYY-MM-DD
-  const yyyy = nextPayment.getFullYear();
-  const mm = String(nextPayment.getMonth() + 1).padStart(2, '0');
-  const dd = String(nextPayment.getDate()).padStart(2, '0');
+  const meses: { [key: string]: number } = { enero: 0, febrero: 1, marzo: 2, abril: 3, mayo: 4, junio: 5, julio: 6, agosto: 7, septiembre: 8, octubre: 9, noviembre: 10, diciembre: 11 };
+
+  let nextPaymentDate = new Date();
+  nextPaymentDate.setMonth(nextPaymentDate.getMonth() + 1); // Default a 1 mes
+  let dateMsg = "dentro de un mes";
+
+  // Busca un número de 1 o 2 dígitos, seguido de "de", seguido de texto (mes)
+  const dateMatch = lowerText.match(/(?:el\s+)?(\d{1,2})\s+de\s+([a-záéíóú]+)/i);
+
+  if (dateMatch) {
+      const day = parseInt(dateMatch[1], 10);
+      // Limpiar acentos y pasar a minúsculas para evitar fallos
+      const monthStr = dateMatch[2].toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      
+      if (meses[monthStr] !== undefined) {
+          const currentDate = new Date();
+          const currentYear = currentDate.getFullYear();
+          
+          nextPaymentDate = new Date(currentYear, meses[monthStr], day);
+          
+          // Si la fecha calculada ya pasó este año, se agenda para el próximo
+          if (nextPaymentDate < currentDate) {
+              nextPaymentDate.setFullYear(currentYear + 1);
+          }
+          
+          const formattedDate = nextPaymentDate.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+          dateMsg = `el ${formattedDate}`;
+      }
+  }
+
+  const yyyy = nextPaymentDate.getFullYear();
+  const mm = String(nextPaymentDate.getMonth() + 1).padStart(2, '0');
+  const dd = String(nextPaymentDate.getDate()).padStart(2, '0');
   const formattedNextPaymentDate = `${yyyy}-${mm}-${dd}`;
 
   let iconBg = '#34302c';
@@ -114,7 +141,7 @@ export const processNLPChat = (text: string, globalCurrency: Currency): NLPResul
 
   return {
     success: true,
-    message: `¡Hecho! He registrado ${name} por ${amount} ${currency}. El próximo cobro será dentro de un mes.`,
+    message: `¡Hecho! He registrado ${name} por ${amount} ${currency}. El próximo cobro será ${dateMsg}.`,
     subscriptionData: newSubscription,
   };
 };
