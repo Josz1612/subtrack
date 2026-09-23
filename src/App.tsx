@@ -20,6 +20,7 @@ import { InsightsScreen } from './components/InsightsScreen';
 import { SubscriptionDetailScreen } from './components/SubscriptionDetailScreen';
 import { NewSubscriptionModal } from './components/NewSubscriptionModal';
 import { SettingsScreen } from './components/SettingsScreen';
+import { AIChatAssistant } from './components/AIChatAssistant';
 import { CheckCircle2, AlertCircle, ArrowLeft } from 'lucide-react';
 import { Preferences } from '@capacitor/preferences';
 import { LocalNotifications } from '@capacitor/local-notifications';
@@ -395,11 +396,17 @@ export default function App() {
       />
 
       {isAuthenticated && (
-        <Header
-          user={user}
-          onAddNew={handleAddNew}
-          onShowToast={showToast}
-        />
+        <>
+          <Header
+            user={user}
+            onAddNew={handleAddNew}
+            onShowToast={showToast}
+          />
+          <AIChatAssistant 
+            globalCurrency={user.preferredCurrency} 
+            onSaveSubscription={handleSaveSubscription} 
+          />
+        </>
       )}
 
       {/* Main Screen Views with Responsive Container */}
